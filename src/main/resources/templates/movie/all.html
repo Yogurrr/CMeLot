@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="htttp://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+    <div id="main">
+
+        <div class="row mt-4 ms-0 align-items-center">
+            <div class="col-2 text-center bg-info fw-bold fs-5 pt-2 pb-2">
+                무비차트
+            </div>
+            <div class="col-2 text-center border-bottom border-info border-2 pt-2 pb-2">
+                <a href="/movie/current" class="text-light fw-bold fs-5" style="text-decoration: none;">현재상영작</a>
+            </div>
+            <div class="col-2 text-center border-bottom border-info border-2 pt-2 pb-2">
+                <a href="/movie/soon" class="text-light fw-bold fs-5" style="text-decoration: none;">상영예정작</a>
+            </div>
+
+            <!-- <div class="offset-4 col-2">
+                <div class="row">
+                    <div class="offset-4 col-8">
+                        <select class="form-select" aria-label="Default select example">
+                            <option selected>예매율순</option>
+                            <option value="1">관람객순</option>
+                        </select>
+                    </div>
+                </div>
+            </div> -->
+        </div>
+
+        <div class="row mt-5 text-light">
+            <div class="col-sm-3 col-xs-6 mb-5" th:each="film:${filmList}">
+                <div class="oneMovie">
+                    <a th:href="|/movie/view?mvno=${film.mvno}|">
+                        <img th:src="${film.poster}" class="img-fluid" style="width: 100%">
+                    </a>
+                    <div class="mt-3">
+                        <th:block th:if="${film.rating} eq 'all'">
+                            <img src="/static/img/all.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '12'">
+                            <img src="/static/img/12.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '15'">
+                            <img src="/static/img/15.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '18'">
+                            <img src="/static/img/18.png" class="img-fluid">
+                        </th:block>
+                        <span th:text="${#strings.length(film.title) &gt; 11 ? #strings.substring(film.title, 0, 10) + '...' : film.title}"
+                                class="fs-4 fw-bold align-items-center" style="vertical-align: middle;"></span>
+                    </div>
+
+                    <div class="mt-2 fs-5" th:text="|예매율 ${film.reservationRate}%|"></div>
+                    <div class="fs-5" th:text="|개봉일 ${film.openingDay}|"></div>
+                    <div class="d-grid gap-2 mt-2">
+                        <button class="btn btn-info fw-bold go2booking" type="button">예매하기</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        let go2booking = document.querySelector('.go2booking');
+        go2booking?.addEventListener('click', () => {
+            location.href = '/ticket/booking';
+        })
+    </script>
+
+</th:block>
+
+</html>

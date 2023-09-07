@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+
+    <style>
+        /* 스크롤바 */
+        .scrollbar { 
+            width: 100%;
+            height: 250px;
+            overflow-y: scroll;
+        }
+        
+        /* 스크롤바의 폭 너비 */
+        .scrollbar::-webkit-scrollbar {
+            width: 10px;  
+        }
+    
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #5bc0de; /* 스크롤바 색상 */
+            border-radius: 10px; /* 스크롤바 둥근 테두리 */
+        }
+    
+        .scrollbar::-webkit-scrollbar-track {
+            background: #5bc0de30; /*스크롤바 뒷 배경 색상*/
+        }
+
+
+        /*달력*/
+        .datepicker {
+            background-color: #161F30;
+            border: none;
+        }
+        
+        .datepicker-dropdown {
+            top: 0;
+            left: 0;
+        }
+        
+        .datepicker table tr td.today, span.focused {
+            border-radius: 50% !important;
+        }
+
+        .datepicker table tr td.today {
+            color: #5bc0de;
+            background-color: #161F30;
+            background-image: none;
+        }
+
+        .datepicker table tr td.today:hover {
+            background-image: none !important;
+            background-color: #eee !important;
+        }
+
+        thead tr:nth-child(2) {
+            background-color: #5bc0de !important;
+        }
+        
+        thead tr:nth-child(3) th {
+            color: #5bc0de !important;
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+        
+        .dow, .old-day, .day, .new-day {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 0px !important;
+        }
+        
+        .old-day:hover, .day:hover, .new-day:hover, .month:hover, .year:hover, .decade:hover, .century:hover {
+            border-radius: 50% !important;
+            background-color: #eee;
+            color: black;
+        }
+        
+        .active {
+            border-radius: 50% !important;
+            /* background-image: linear-gradient(#90CAF9, #64B5F6) !important; */
+            background-image: none !important;
+            background-color: #5bc0de !important;
+            color: black !important;
+        }
+
+        .active-day {
+            background-image: none !important;
+            background-color: #5bc0de !important;
+        }
+        
+        .prev, .next, .datepicker-switch {
+            border-radius: 0 !important;
+            padding: 20px 10px !important;
+            text-transform: uppercase;
+            font-size: 20px;
+            color: black;
+            opacity: 0.8;
+        }
+        
+        .prev:hover, .next:hover, .datepicker-switch:hover {
+            background-color: inherit !important;
+            opacity: 1;
+        }
+
+        .datepicker .prev.disabled, .datepicker .next.disabled {
+            visibility: visible;
+        }
+
+        #calendar > div {
+            width: 100%;
+        }
+
+        #calendar > div > div.datepicker-days > table > thead > tr:nth-child(2) {
+            width: 100%;
+            background-color: #5bc0de !important;
+        }
+
+        #calendar > div > div.datepicker-months > table > tbody > tr > td > span.month.focused {
+            color: black !important;
+        }
+
+        #calendar > div > div.datepicker-years > table > tbody > tr > td > span.year.focused {
+            color: black !important;
+        }
+
+        /*좌석 버튼*/
+        .oneSeat:hover {
+            background-color: #5bc0de;
+            color: black !important;
+        }
+            
+    </style>
+
+    <div id="main" class="mt-2 text-light">
+
+        <div class="text-light fw-bold fs-1">
+            <img src="/static/img/ticket.png" class="img-fluid" style="width: 4%;">
+            예매하기
+        </div>
+        <div class="row mt-4">
+            <div class="col-3">
+                <div class="rounded text-center fw-bold py-2 mb-3 fs-5" style="background-color: #28323C;">
+                    <div>극장 선택</div>
+                </div>
+                <div style="height: 450px; overflow: auto;" class="scrollbar">
+                    <div class="accordion" id="accordionLocation">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSeoul" aria-expanded="true" aria-controls="collapseSeoul">
+                                    서울
+                                </button>
+                            </h2>
+                            <div id="collapseSeoul" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[강남구]</div>
+                                    <div><button class="btn" name="seoulGangnamCgv01" id="cinema1">CGV 강남</button></div>
+                                    <div><button class="btn" name="seoulGangnamCgv02" id="cinema2">CGV 압구정</button></div>
+                                    <div><button class="btn" name="seoulGangnamMega02" id="cinema3">메가박스 강남대로(씨티)</button></div>
+                                    <div><button class="btn" name="seoulGangnamMega03" id="cinema4">메가박스 코엑스</button></div>
+                                    <div><button class="btn" name="seoulGangnamLotte01" id="cinema5">롯데시네마 도곡</button></div>
+                                    <div><button class="btn" name="seoulGangnamLotte02" id="cinema6">롯데시네마 브로드웨이</button></div>
+
+                                    <div class="fw-bold mt-3">[강동구]</div>
+                                    <div><button class="btn" name="seoulGangdongCgv01" id="cinema7">CGV 천호</button></div>
+                                    <div><button class="btn" name="seoulGandongMega01" id="cinema8">메가박스 강동</button></div>
+                                    <div><button class="btn" name="seoulGangdongLotte01" id="cinema9">롯데시네마 강동</button></div>
+
+                                    <div class="fw-bold mt-3">[강북구]</div>
+                                    <div><button class="btn" name="seoulGangbukCgv01" id="cinema10">CGV 미아</button></div>
+                                    <div><button class="btn" name="seoulGangbukCgv02" id="cinema11">CGV 수유</button></div>
+                                    <div><button class="btn" name="seoulGangbukLotte01" id="cinema12">롯데시네마 수유</button></div>
+
+                                    <div class="fw-bold mt-3">[강서구]</div>
+                                    <div><button class="btn" name="seoulGangseoCgv01" id="cinema13">CGV 등촌</button></div>
+                                    <div><button class="btn" name="seoulGangseoMega01" id="cinema14">메가박스 마곡</button></div>
+                                    <div><button class="btn" name="seoulGangseoMega02" id="cinema15">메가박스 화곡</button></div>
+                                    <div><button class="btn" name="seoulGangseoLotte01" id="cinema16">롯데시네마 가양</button></div>
+                                    <div><button class="btn" name="seoulGangseoLotte02" id="cinema17">롯데시네마 김포공항</button></div>
+
+                                    <div class="fw-bold mt-3">[관악구]</div>
+                                    <div><button class="btn" name="seoulGanwakLotte01" id="cinema18">롯데시네마 서울대입구</button></div>
+
+                                    <div class="fw-bold mt-3">[광진구]</div>
+                                    <div><button class="btn" name="seoulGwangjinCgv01" id="cinema19">CGV 강변</button></div>
+                                    <div><button class="btn" name="seoulGwangjinCgv02" id="cinema20">CGV 건대입구</button></div>
+                                    <div><button class="btn" name="seoulGwangjinMega01" id="cinema21">메가박스 군자</button></div>
+                                    <div><button class="btn" name="seoulGwangjinLotte01" id="cinema22">롯데시네마 건대입구</button></div>
+
+                                    <div class="fw-bold mt-3">[구로구]</div>
+                                    <div><button class="btn" name="seoulGuroCgv01" id="cinema23">CGV 구로</button></div>
+                                    <div><button class="btn" name="seoulGuroLotte01" id="cinema24">롯데시네마 신도림</button></div>
+
+                                    <div class="fw-bold mt-3">[금천구]</div>
+                                    <div><button class="btn" name="seoulGeumcheonLotte01" id="cinema25">롯데시네마 가산디지털</button></div>
+                                    <div><button class="btn" name="seoulGeumcheonLotte02" id="cinema26">롯데시네마 독산</button></div>
+
+                                    <div class="fw-bold mt-3">[노원구]</div>
+                                    <div><button class="btn" name="seoulNowonCgv01" id="cinema27">CGV 중계</button></div>
+                                    <div><button class="btn" name="seoulNowonCgv02" id="cinema28">CGV 하자</button></div>
+                                    <div><button class="btn" name="seoulNowonLotte01" id="cinema29">롯데시네마 노원</button></div>
+                                    <div><button class="btn" name="seoulNowonLotte01" id="cinema30">롯데시네마 수락산점</button></div>
+
+                                    <div class="fw-bold mt-3">[도봉구]</div>
+                                    <div><button class="btn" name="seoulDobongCgv01" id="cinema31">CGV 방학</button></div>
+                                    <div><button class="btn" name="seoulDobongMega01" id="cinema32">메가박스 창동</button></div>
+
+                                    <div class="fw-bold mt-3">[동대문구]</div>
+                                    <div><button class="btn" name="seoulDongdaemunLotte01" id="cinema33">롯데시네마 청량리점</button></div>
+
+                                    <div class="fw-bold mt-3">[동작구]</div>
+                                    <div><button class="btn" name="seoulDongjakMega01" id="cinema34">메가박스 이수</button></div>
+                                    <div><button class="btn" name="seoulDongjakMega02" id="cinema35">메가박스 ARTNINE</button></div>
+                                    <div><button class="btn" name="seoulDongjakLotte01" id="cinema36">롯데시네마 신대방</button></div>
+
+                                    <div class="fw-bold mt-3">[마포구]</div>
+                                    <div><button class="btn" name="seoulMapoCgv01" id="cinema37">CGV 홍대</button></div>
+                                    <div><button class="btn" name="seoulMapoMega01" id="cinema38">메가박스 상암월드컵경기장</button></div>
+                                    <div><button class="btn" name="seoulMapoMega02" id="cinema39">메가박스 홍대</button></div>
+                                    <div><button class="btn" name="seoulMapoLotte01" id="cinema40">롯데시네마 합정점</button></div>
+                                    <div><button class="btn" name="seoulMapoLotte02" id="cinema41">롯데시네마 홍대입구</button></div>
+
+                                    <div class="fw-bold mt-3">[서대문구]</div>
+                                    <div><button class="btn" name="seoulSeodaemunCgv01" id="cinema42">CGV 신촌아트레온</button></div>
+                                    <div><button class="btn" name="seoulSeodaemunCgv02" id="cinema43">CGV 연남</button></div>
+                                    <div><button class="btn" name="seoulSeodaemunMega01" id="cinema44">메가박스 신촌</button></div>
+
+                                    <div class="fw-bold mt-3">[서초구]</div>
+                                    <div><button class="btn" name="seoulSeochoMega01" id="cinema45">메가박스 강남</button></div>
+                                    <div><button class="btn" name="seoulSeochoMega02" id="cinema46">메가박스 센트럴</button></div>
+
+                                    <div class="fw-bold mt-3">[성동구]</div>
+                                    <div><button class="btn" name="seoulSeongdongCgv01" id="cinema47">CGV 왕십리</button></div>
+                                    <div><button class="btn" name="seoulSeongdongMega01" id="cinema48">메가박스 성수</button></div>
+
+                                    <div class="fw-bold mt-3">[성북구]</div>
+                                    <div><button class="btn" name="seoulSeongbukCgv01" id="cinema49">CGV 성신여대입구</button></div>
+
+                                    <div class="fw-bold mt-3">[송파구]</div>
+                                    <div><button class="btn" name="seoulSongpaCgv01" id="cinema50">CGV 송파</button></div>
+                                    <div><button class="btn" name="seoulSongpaMega01" id="cinema51">메가박스 송파파크하비오</button></div>
+                                    <div><button class="btn" name="seoulSongpaLotte01" id="cinema52">롯데시네마 월드타워점</button></div>
+
+                                    <div class="fw-bold mt-3">[양천구]</div>
+                                    <div><button class="btn text-start" name="seoulYangcheonCgv01" id="cinema53">메가박스 더 부티크 목동현대백화점</button></div>
+                                    <div><button class="btn" name="seoulYangcheonMega01" id="cinema54">메가박스 목동</button></div>
+
+                                    <div class="fw-bold mt-3">[영등포구]</div>
+                                    <div><button class="btn" name="seoulYoungdeungpoCgv01" id="cinema55">CGV 여의도</button></div>
+                                    <div><button class="btn" name="seoulYoungdeungpoCgv02" id="cinema56">CGV 영등포</button></div>
+                                    <div><button class="btn" name="seoulYoungdeungpoLotte01" id="cinema57">롯데시네마 영등포</button></div>
+
+                                    <div class="fw-bold mt-3">[용산구]</div>
+                                    <div><button class="btn" name="seoulYongsanCgv01" id="cinema58">CGV 용산아이파크몰</button></div>
+                                    <div><button class="btn" name="seoulYongsanLotte01" id="cinema59">롯데시네마 용산</button></div>
+
+                                    <div class="fw-bold mt-3">[은평구]</div>
+                                    <div><button class="btn" name="seoulEunpyeongCgv01" id="cinema60">CGV 불광</button></div>
+                                    <div><button class="btn" name="seoulEunpyeongLotte01" id="cinema61">롯데시네마 은평</button></div>
+
+                                    <div class="fw-bold mt-3">[종로구]</div>
+                                    <div><button class="btn" name="seoulJongnoCgv01" id="cinema62">CGV 대학로</button></div>
+                                    <div><button class="btn" name="seoulJongnoCgv02" id="cinema63">CGV 피카다리 1958</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="seoulJungCgv01" id="cinema64">CGV 동대문</button></div>
+                                    <div><button class="btn" name="seoulJungCgv02" id="cinema65">CGV 명동</button></div>
+                                    <div><button class="btn" name="seoulJungCgv03" id="cinema66">CGV 명동역 씨네라이브러리</button></div>
+                                    <div><button class="btn" name="seoulJungMega01" id="cinema67">메가박스 동대문</button></div>
+                                    <div><button class="btn" name="seoulJungLotte01" id="cinema68">롯데시네마 에비뉴엘</button></div>
+
+                                    <div class="fw-bold mt-3">[중랑구]</div>
+                                    <div><button class="btn" name="seoulJungnangCgv01" id="cinema69">CGV 상봉</button></div>
+                                    <div><button class="btn" name="seoulJungnangMega01" id="cinema70">메가박스 상봉</button></div>
+                                    <div><button class="btn" name="seoulJungnangLotte01" id="cinema71">롯데시네마 중랑</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIncheon" aria-expanded="false" aria-controls="collapseIncheon">
+                                    인천
+                                </button>
+                            </h2>
+                            <div id="collapseIncheon" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[계양구]</div>
+                                    <div><button class="btn" name="IncheonGyeyangCgv01" id="cinema72">CGV 계양</button></div>
+
+                                    <div class="fw-bold mt-3">[미추홀구]</div>
+                                    <div><button class="btn" name="IncheonMichuholCgv01" id="cinema73">CGV 인천학익</button></div>
+                                    <div><button class="btn" name="IncheonMichuholCgv02" id="cinema74">CGV 주안역</button></div>
+                                    <div><button class="btn" name="IncheonMichuholCgv03" id="cinema75">CGV 인천시민공원</button></div>
+                                    <div><button class="btn" name="IncheonMichuholCgv04" id="cinema76">CGV 인천도화</button></div>
+                                    <div><button class="btn" name="IncheonMichuholLotte01" id="cinema77">롯데시네마 인천터미널</button></div>
+
+                                    <div class="fw-bold mt-3">[남동구]</div>
+                                    <div><button class="btn" name="IncheonNamdongCgv01" id="cinema78">CGV 인천</button></div>
+                                    <div><button class="btn" name="IncheonNamdongCgv02" id="cinema79">CGV 인천논현</button></div>
+                                    <div><button class="btn" name="IncheonNamdongMega01" id="cinema80">메가박스 인천논현</button></div>
+
+                                    <div class="fw-bold mt-3">[부평구]</div>
+                                    <div><button class="btn" name="IncheonBupyeongCgv01" id="cinema81">CGV 부평</button></div>
+                                    <div><button class="btn" name="IncheonBupyeongLotte01" id="cinema82">롯데시네마 부평갈산</button></div>
+                                    <div><button class="btn" name="IncheonBupyeongLotte02" id="cinema83">롯데시네마 부평역사</button></div>
+                                    <div><button class="btn" name="IncheonBupyeongLotte03" id="cinema84">롯데시네마 부평점</button></div>
+
+                                    <div class="fw-bold mt-3">[서구]</div>
+                                    <div><button class="btn" name="IncheonSeoCgv01" id="cinema85">CGV 인천가정</button></div>
+                                    <div><button class="btn" name="IncheonSeoCgv02" id="cinema86">CGV 청라</button></div>
+                                    <div><button class="btn" name="IncheonSeoMega01" id="cinema87">메가박스 검단</button></div>
+                                    <div><button class="btn" name="IncheonSeoMega02" id="cinema88">메가박스 청라지젤</button></div>
+                                    <div><button class="btn" name="IncheonSeoLotte01" id="cinema89">롯데시네마 인천아시아드관</button></div>
+
+                                    <div class="fw-bold mt-3">[연수구]</div>
+                                    <div><button class="btn" name="IncheonYeonsuCgv01" id="cinema90">CGV 송도타임스페이스</button></div>
+                                    <div><button class="btn" name="IncheonYeonsuCgv02" id="cinema91">CGV 연수역</button></div>
+                                    <div><button class="btn" name="IncheonYeonsuCgv03" id="cinema92">CGV 인천연수</button></div>
+                                    <div><button class="btn" name="IncheonYeonsuMega01" id="cinema93">메가박스 송도</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="IncheonJungMega01" id="cinema94">메가박스 영종</button></div>
+                                    <div><button class="btn" name="IncheonJungLotte01" id="cinema95">롯데시네마 영종하늘도시</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGyeonggi" aria-expanded="false" aria-controls="collapseGyeonggi">
+                                    경기
+                                </button>
+                            </h2>
+                            <div id="collapseGyeonggi" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[고양시]</div>
+                                    <div><button class="btn" name="GyeonggiGoyangCgv01" id="cinema96">CGV 고양백석</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangCgv02" id="cinema97">CGV 고양행신</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangCgv03" id="cinema98">CGV 일산</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangCgv04" id="cinema99">CGV 화정</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangMega01" id="cinema100">메가박스 고양스타필드</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangMega02" id="cinema101">메가박스 백석벨라시타</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangMega03" id="cinema102">메가박스 일산</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangMega04" id="cinema103">메가박스 킨텍스</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangLotte01" id="cinema104">롯데시네마 라페스타</button></div>
+                                    <div><button class="btn" name="GyeonggiGoyangLotte02" id="cinema105">롯데시네마 주엽점</button></div>
+
+                                    <div class="fw-bold mt-3">[광명시]</div>
+                                    <div><button class="btn" name="GyeonggiGwangmyeongCgv01" id="cinema106">CGV 광명역</button></div>
+                                    <div><button class="btn" name="GyeonggiGwangmyeongMega01" id="cinema107">메가박스 광명AK플라자</button></div>
+                                    <div><button class="btn" name="GyeonggiGwangmyeongMega02" id="cinema108">메가박스 광명소하</button></div>
+                                    <div><button class="btn" name="GyeonggiGwangmyeongLotte01" id="cinema109">롯데시네마 광명(광명사거리)</button></div>
+                                    <div><button class="btn" name="GyeonggiGwangmyeongLotte02" id="cinema110">롯데시네마 광명아울렛점</button></div>
+
+                                    <div class="fw-bold mt-3">[광주시]</div>
+                                    <div><button class="btn" name="GyeonggiGwangjuCgv01" id="cinema111">CGV 경기광주</button></div>
+                                    <div><button class="btn" name="GyeonggiGwangjuLotte01" id="cinema112">롯데시네마 광주터미널</button></div>
+
+                                    <div class="fw-bold mt-3">[구리시]</div>
+                                    <div><button class="btn" name="GyeonggiGuriCgv01" id="cinema113">CGV 구리</button></div>
+                                    <div><button class="btn" name="GyeonggiGuriLotte01" id="cinema114">롯데시네마 구리아울렛점</button></div>
+
+                                    <div class="fw-bold mt-3">[군포시]</div>
+                                    <div><button class="btn" name="GyeonggiGunpoCgv01" id="cinema115">CGV 산본</button></div>
+                                    <div><button class="btn" name="GyeonggiGunpoMega01" id="cinema116">메가박스 금정AK플라자</button></div>
+                                    <div><button class="btn" name="GyeonggiGunpoLotte01" id="cinema117">롯데시네마 롯데피트인 산본점</button></div>
+
+                                    <div class="fw-bold mt-3">[김포시]</div>
+                                    <div><button class="btn" name="GyeonggiGimpoCgv01" id="cinema118">CGV 김포</button></div>
+                                    <div><button class="btn" name="GyeonggiGimpoCgv02" id="cinema119">CGV 김포운양</button></div>
+                                    <div><button class="btn" name="GyeonggiGimpoCgv03" id="cinema120">CGV 김포한강</button></div>
+                                    <div><button class="btn" name="GyeonggiGimpoMega01" id="cinema121">메가박스 김포한강신도시</button></div>
+
+                                    <div class="fw-bold mt-3">[남양주시]</div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuCgv01" id="cinema122">CGV 남양주화도</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuCgv02" id="cinema123">CGV 다산</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuMega01" id="cinema124">메가박스 남양주</button></div>
+                                    <div><button class="btn text-start" name="GyeonggiNamyangjuMega02" id="cinema125">메가박스 남양주현대아울렛스페이스원</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuMega03" id="cinema126">메가박스 별내</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuLotte01" id="cinema127">롯데시네마 마석</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuLotte02" id="cinema128">롯데시네마 별내점</button></div>
+                                    <div><button class="btn" name="GyeonggiNamyangjuLotte03" id="cinema129">롯데시네마 진접</button></div>
+
+                                    <div class="fw-bold mt-3">[동두천시]</div>
+                                    <div><button class="btn" name="GyeonggiDongducheonCgv01" id="cinema130">CGV 동두천</button></div>
+
+                                    <div class="fw-bold mt-3">[부천시]</div>
+                                    <div><button class="btn" name="GyeonggiBucheonCgv01" id="cinema131">CGV 부천</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonCgv02" id="cinema132">CGV 부천역</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonCgv03" id="cinema133">CGV 부천옥길</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonCgv04" id="cinema134">CGV 소풍</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonCgv05" id="cinema135">CGV 역곡</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonMega01" id="cinema136">메가박스 부천스타필드시티</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonLotte01" id="cinema137">롯데시네마 부천</button></div>
+                                    <div><button class="btn" name="GyeonggiBucheonLotte02" id="cinema138">롯데시네마 부천역</button></div>
+
+                                    <div class="fw-bold mt-3">[성남시]</div>
+                                    <div><button class="btn" name="GyeonggiSeongnamCgv01" id="cinema139">CGV 서현</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamCgv02" id="cinema141">CGV 성남모란</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamCgv03" id="cinema142">CGV 야탑</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamCgv04" id="cinema143">CGV 오리</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamCgv05" id="cinema144">CGV 판교</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamMega01" id="cinema145">메가박스 분당</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamLotte01" id="cinema146">롯데시네마 성남중앙</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamLotte02" id="cinema147">롯데시네마 위례</button></div>
+                                    <div><button class="btn" name="GyeonggiSeongnamLotte03" id="cinema148">롯데시네마 판교</button></div>
+
+                                    <div class="fw-bold mt-3">[수원시]</div>
+                                    <div><button class="btn" name="GyeonggiSuwonCgv01" id="cinema149">CGV 광교</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonCgv02" id="cinema150">CGV 동수원</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonCgv03" id="cinema151">CGV 북수원</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonMega01" id="cinema152">메가박스 수원</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonMega02" id="cinema153">메가박스 수원남문</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonMega03" id="cinema154">메가박스 수원호매실</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonMega04" id="cinema155">메가박스 영통</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonLotte01" id="cinema156">롯데시네마 광교아울렛</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonLotte02" id="cinema157">롯데시네마 북수원</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonLotte03" id="cinema158">롯데시네마 서수원</button></div>
+                                    <div><button class="btn" name="GyeonggiSuwonLotte04" id="cinema159">롯데시네마 수원</button></div>
+
+                                    <div class="fw-bold mt-3">[시흥시]</div>
+                                    <div><button class="btn" name="GyeonggiSiheungCgv01" id="cinema160">CGV 배곧</button></div>
+                                    <div><button class="btn" name="GyeonggiSiheungCgv02" id="cinema161">CGV 시흥</button></div>
+                                    <div><button class="btn" name="GyeonggiSiheungCgv03" id="cinema162">CGV 정왕</button></div>
+                                    <div><button class="btn" name="GyeonggiSiheungMega01" id="cinema163">메가박스 시흥배곧</button></div>
+                                    <div><button class="btn" name="GyeonggiSiheungLotte01" id="cinema164">롯데시네마 시화</button></div>
+                                    <div><button class="btn" name="GyeonggiSiheungLotte02" id="cinema165">롯데시네마 시흥장현</button></div>
+
+                                    <div class="fw-bold mt-3">[안산시]</div>
+                                    <div><button class="btn" name="GyeonggiAnsanCgv01" id="cinema166">CGV 안산</button></div>
+                                    <div><button class="btn" name="GyeonggiAnsanMega01" id="cinema167">메가박스 안산중앙</button></div>
+                                    <div><button class="btn" name="GyeonggiAnsanLotte01" id="cinema168">롯데시네마 센트럴락</button></div>
+                                    <div><button class="btn" name="GyeonggiAnsanLotte02" id="cinema169">롯데시네마 안산</button></div>
+                                    <div><button class="btn" name="GyeonggiAnsanLotte03" id="cinema170">롯데시네마 안산고잔</button></div>
+
+                                    <div class="fw-bold mt-3">[안성시]</div>
+                                    <div><button class="btn" name="GyeonggiAnseongCgv01" id="cinema171">CGV 안성</button></div>
+                                    <div><button class="btn" name="GyeonggiAnseongMega01" id="cinema172">메가박스 안성스타필드</button></div>
+                                    <div><button class="btn" name="GyeonggiAnseongLotte01" id="cinema173">롯데시네마 안성</button></div>
+
+                                    <div class="fw-bold mt-3">[안양시]</div>
+                                    <div><button class="btn" name="GyeonggiAnyangCgv01" id="cinema174">CGV 범계</button></div>
+                                    <div><button class="btn" name="GyeonggiAnyangCgv02" id="cinema175">CGV 평촌</button></div>
+                                    <div><button class="btn" name="GyeonggiAnyangLotte01" id="cinema176">롯데시네마 안양</button></div>
+                                    <div><button class="btn" name="GyeonggiAnyangLotte02" id="cinema177">롯데시네마 안양일번가</button></div>
+                                    <div><button class="btn" name="GyeonggiAnyangLotte03" id="cinema178">롯데시네마 인덕원</button></div>
+                                    <div><button class="btn" name="GyeonggiAnyangLotte04" id="cinema179">롯데시네마 평촌</button></div>
+
+                                    <div class="fw-bold mt-3">[양주시]</div>
+                                    <div><button class="btn" name="GyeonggiYangjoCgv01" id="cinema180">CGV 양주옥정</button></div>
+                                    <div><button class="btn" name="GyeonggiYangjoMega01" id="cinema181">메가박스 양주</button></div>
+
+                                    <div class="fw-bold mt-3">[오산시]</div>
+                                    <div><button class="btn" name="GyeonggiOsanCgv01" id="cinema182">CGV 오산중앙</button></div>
+                                    <div><button class="btn" name="GyeonggiOsanCgv01" id="cinema183">롯데시네마 오산원동</button></div>
+
+                                    <div class="fw-bold mt-3">[용인시]</div>
+                                    <div><button class="btn" name="GyeonggiYonginCgv01" id="cinema184">CGV 광교상현</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginCgv02" id="cinema185">CGV 기흥</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginCgv03" id="cinema186">CGV 동백</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginCgv04" id="cinema187">CGV 신세계경기</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginCgv05" id="cinema188">CGV 용인</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginMega01" id="cinema189">메가박스 용인기흥</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginMega02" id="cinema190">메가박스 용인테크노밸리</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginLotte01" id="cinema191">롯데시네마 수지</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginLotte02" id="cinema192">롯데시네마 용인기흥</button></div>
+                                    <div><button class="btn" name="GyeonggiYonginLotte03" id="cinema193">롯데시네마 용인역북</button></div>
+
+                                    <div class="fw-bold mt-3">[의정부시]</div>
+                                    <div><button class="btn" name="GyeonggiUijeongbuCgv01" id="cinema194">CGV 의정부</button></div>
+                                    <div><button class="btn" name="GyeonggiUijeongbuCgv02" id="cinema195">CGV 의정부태흥</button></div>
+                                    <div><button class="btn" name="GyeonggiUijeongbuMega01" id="cinema196">메가박스 의정부민락</button></div>
+                                    <div><button class="btn" name="GyeonggiUijeongbuLotte01" id="cinema197">롯데시네마 의정부민락</button></div>
+
+                                    <div class="fw-bold mt-3">[이천시]</div>
+                                    <div><button class="btn" name="GyeonggiIcheonCgv01" id="cinema198">CGV 이천</button></div>
+
+                                    <div class="fw-bold mt-3">[파주시]</div>
+                                    <div><button class="btn" name="GyeonggiPajuCgv01" id="cinema199">CGV 파주문산</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuCgv02" id="cinema200">CGV 파주야당</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuMega01" id="cinema201">메가박스 파주금촌</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuMega02" id="cinema202">메가박스 파주운정</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuMega03" id="cinema203">메가박스 파주출판도시</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuLotte01" id="cinema204">롯데시네마 파주롯데아울렛</button></div>
+                                    <div><button class="btn" name="GyeonggiPajuLotte02" id="cinema205">롯데시네마 파주운정</button></div>
+
+                                    <div class="fw-bold mt-3">[평택시]</div>
+                                    <div><button class="btn" name="GyeonggiPyeongtaekCgv01" id="cinema206">CGV 평택</button></div>
+                                    <div><button class="btn" name="GyeonggiPyeongtaekCgv02" id="cinema207">CGV 평택고덕</button></div>
+                                    <div><button class="btn" name="GyeonggiPyeongtaekCgv03" id="cinema208">CGV 평택소사</button></div>
+                                    <div><button class="btn" name="GyeonggiPyeongtaekLotte01" id="cinema209">롯데시네마 송탄</button></div>
+                                    <div><button class="btn" name="GyeonggiPyeongtaekLotte01" id="cinema210">롯데시네마 펴액비전</button></div>
+
+                                    <div class="fw-bold mt-3">[포천시]</div>
+                                    <div><button class="btn" name="GyeonggiPocheonCgv01" id="cinema211">CGV 포천</button></div>
+
+                                    <div class="fw-bold mt-3">[하남시]</div>
+                                    <div><button class="btn" name="GyeonggiHanamCgv01" id="cinema212">CGV 스타필드위례</button></div>
+                                    <div><button class="btn" name="GyeonggiHanamCgv02" id="cinema213">CGV 하남미사</button></div>
+                                    <div><button class="btn" name="GyeonggiHanamMega01" id="cinema214">메가박스 미사강변</button></div>
+                                    <div><button class="btn" name="GyeonggiHanamMega02" id="cinema215">메가박스 하남스타필드</button></div>
+                                    <div><button class="btn" name="GyeonggiHanamLotte01" id="cinema216">롯데시네마 하남미사점</button></div>
+
+                                    <div class="fw-bold mt-3">[화성시]</div>
+                                    <div><button class="btn" name="GyeonggiHwaseongCgv01" id="cinema217">CGV 동탄</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongCgv02" id="cinema218">CGV 동탄그랑파사쥬</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongCgv03" id="cinema219">CGV 동탄역</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongCgv04" id="cinema220">CGV 동탄호수공원</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongCgv05" id="cinema221">CGV 화성봉담</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongMega01" id="cinema222">메가박스 동탄</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongLotte01" id="cinema223">롯데시네마 동탄</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongLotte02" id="cinema224">롯데시네마 병점</button></div>
+                                    <div><button class="btn" name="GyeonggiHwaseongLotte03" id="cinema225">롯데시네마 향남</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDaegu" aria-expanded="false" aria-controls="collapseDaegu">
+                                    대구
+                                </button>
+                            </h2>
+                            <div id="collapseDaegu" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[달서구]</div>
+                                    <div><button class="btn" name="DaeguDalseoCgv01" id="cinema226">CGV 대구월성</button></div>
+                                    <div><button class="btn" name="DaeguDalseoLotte01" id="cinema227">롯데시네마 대구현풍</button></div>
+                                    <div><button class="btn" name="DaeguDalseoLotte02" id="cinema228">롯데시네마 상인</button></div>
+                                    <div><button class="btn" name="DaeguDalseoLotte03" id="cinema229">롯데시네마 성서</button></div>
+
+                                    <div class="fw-bold mt-3">[동구]</div>
+                                    <div><button class="btn" name="DaeguDongMega01" id="cinema230">메가박스 대구이시아</button></div>
+                                    <div><button class="btn" name="DaeguDongMega02" id="cinema231">메가박스 대구신세계</button></div>
+                                    <div><button class="btn" name="DaeguDongLotte01" id="cinema232">롯데시네마 대구율하</button></div>
+
+                                    <div class="fw-bold mt-3">[북구]</div>
+                                    <div><button class="btn" name="DaeguBukCgv01" id="cinema233">CGV 대구</button></div>
+                                    <div><button class="btn" name="DaeguBukCgv02" id="cinema234">CGV 대구연경</button></div>
+                                    <div><button class="btn" name="DaeguBukMega01" id="cinema235">메가박스 북대구(칠곡)</button></div>
+                                    <div><button class="btn" name="DaeguBukLotte01" id="cinema236">롯데시네마 프리미엄칠곡점</button></div>
+
+                                    <div class="fw-bold mt-3">[서구]</div>
+                                    <div><button class="btn" name="DaeguSeoLotte01" id="cinema237">롯데시네마 대구광장</button></div>
+
+                                    <div class="fw-bold mt-3">[수성구]</div>
+                                    <div><button class="btn" name="DaeguSuseongCgv01" id="cinema238">CGV 대구수성</button></div>
+                                    <div><button class="btn" name="DaeguSuseongCgv02" id="cinema239">CGV 대구스타디움</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="DaeguJungCgv01" id="cinema240">CGV 대구아카데미</button></div>
+                                    <div><button class="btn" name="DaeguJungCgv02" id="cinema241">CGV 대구한일</button></div>
+                                    <div><button class="btn" name="DaeguJungCgv03" id="cinema242">CGV 대구현대</button></div>
+                                    <div><button class="btn" name="DaeguJungLotte01" id="cinema243">롯데시네마 동성로점</button></div>
+                                    <div><button class="btn" name="DaeguJungLotte02" id="cinema244">롯데시네마 프리미엄 만경</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBusan" aria-expanded="false" aria-controls="collapseBusan">
+                                    부산
+                                </button>
+                            </h2>
+                            <div id="collapseBusan" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[강서구]</div>
+                                    <div><button class="btn" name="BusanGangseoCgv01" id="cinema245">CGV 부산명지</button></div>
+                                    <div><button class="btn" name="BusanGangseoLotte01" id="cinema246">롯데시네마 부산명지</button></div>
+
+                                    <div class="fw-bold mt-3">[금정구]</div>
+                                    <div><button class="btn" name="BusanGeumjeongMega01" id="cinema247">메가박스 부산대</button></div>
+                                    <div><button class="btn" name="BusanGeumjeongLotte01" id="cinema248">롯데시네마 오투</button></div>
+
+                                    <div class="fw-bold mt-3">[기장군]</div>
+                                    <div><button class="btn" name="BusanGijangCgv01" id="cinema249">CGV 정관</button></div>
+                                    <div><button class="btn" name="BusanGijangMega01" id="cinema250">메가박스 정관</button></div>
+                                    <div><button class="btn" name="BusanGijangLotte01" id="cinema251">롯데시네마 동부산</button></div>
+
+                                    <div class="fw-bold mt-3">[남구]</div>
+                                    <div><button class="btn" name="BusanNamCgv01" id="cinema252">CGV 대연</button></div>
+
+                                    <div class="fw-bold mt-3">[동래구]</div>
+                                    <div><button class="btn" name="BusanDongnaeCgv01" id="cinema253">CGV 동래</button></div>
+                                    <div><button class="btn" name="BusanDongnaeLotte01" id="cinema254">롯데시네마 동래</button></div>
+
+                                    <div class="fw-bold mt-3">[부산진구]</div>
+                                    <div><button class="btn" name="BusanBusanjinCgv01" id="cinema255">CGV 서면</button></div>
+                                    <div><button class="btn" name="BusanBusanjinCgv02" id="cinema256">CGV 서면삼정타워</button></div>
+                                    <div><button class="btn" name="BusanBusanjinCgv03" id="cinema257">CGV 서면상상마당</button></div>
+                                    <div><button class="btn" name="BusanBusanjinLotte01" id="cinema258">롯데시네마 부산본점</button></div>
+                                    <div><button class="btn" name="BusanBusanjinLotte01" id="cinema259">롯데시네마 서면</button></div>
+
+                                    <div class="fw-bold mt-3">[북구]</div>
+                                    <div><button class="btn" name="BusanBukCgv01" id="cinema260">CGV 화명</button></div>
+                                    <div><button class="btn" name="BusanBukMega01" id="cinema261">메가박스 덕천</button></div>
+
+                                    <div class="fw-bold mt-3">[사상구]</div>
+                                    <div><button class="btn" name="BusanSasangMega01" id="cinema262">메가박스 사상</button></div>
+
+                                    <div class="fw-bold mt-3">[사하구]</div>
+                                    <div><button class="btn" name="BusanSahaCgv01" id="cinema263">CGV 하단아트몰링</button></div>
+
+                                    <div class="fw-bold mt-3">[연제구]</div>
+                                    <div><button class="btn" name="BusanYeonjeCgv01" id="cinema264">CGV 아시아드</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="BusanJungMega01" id="cinema265">메가박스 부산극장</button></div>
+                                    <div><button class="btn" name="BusanJungLotte01" id="cinema266">롯데시네마 광복점</button></div>
+                                    <div><button class="btn" name="BusanJungLotte02" id="cinema267">롯데시네마 대영</button></div>
+
+                                    <div class="fw-bold mt-3">[해운대구]</div>
+                                    <div><button class="btn" name="BusanHaeundaeCgv01" id="cinema268">CGV 센텀시티</button></div>
+                                    <div><button class="btn" name="BusanHaeundaeCgv02" id="cinema269">CGV 해운대</button></div>
+                                    <div><button class="btn" name="BusanHaeundaeMega01" id="cinema270">메가박스 해운대(장산)</button></div>
+                                    <div><button class="btn" name="BusanHaeundaeLotte01" id="cinema271">롯데시네마 센텀시티</button></div>
+                                    <div><button class="btn" name="BusanHaeundaeLotte02" id="cinema272">롯데시네마 해운대</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUlsan" aria-expanded="false" aria-controls="collapseUlsan">
+                                    울산
+                                </button>
+                            </h2>
+                            <div id="collapseUlsan" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[남구]</div>
+                                    <div><button class="btn" name="UlsanNamCgv01" id="cinema273">CGV 울산삼산</button></div>
+                                    <div><button class="btn" name="UlsanNamLotte01" id="cinema274">롯데시네마 울산백화점점</button></div>
+
+                                    <div class="fw-bold mt-3">[동구]</div>
+                                    <div><button class="btn" name="UlsanDongCgv01" id="cinema275">CGV 울산동구</button></div>
+
+                                    <div class="fw-bold mt-3">[북구]</div>
+                                    <div><button class="btn" name="UlsanBukCgv01" id="cinema276">CGV 울산신천</button></div>
+                                    <div><button class="btn" name="UlsanBukCgv02" id="cinema277">CGV 울산진장</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="UlsanJungMega01" id="cinema278">메가박스 울산</button></div>
+                                    <div><button class="btn" name="UlsanJungLotte01" id="cinema279">롯데시네마 울산성남</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGyeongsang" aria-expanded="false" aria-controls="collapseGyeongsang">
+                                    경상
+                                </button>
+                            </h2>
+                            <div id="collapseGyeongsang" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[경남/거제시]</div>
+                                    <div><button class="btn" name="GyeongsangGeojeCgv01" id="cinema280">CGV 거제</button></div>
+
+                                    <div class="fw-bold">[경남/거창시]</div>
+                                    <div><button class="btn" name="GyeongsangGeochangLotte01" id="cinema281">롯데시네마 거창</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/고성군]</div>
+                                    <div><button class="btn" name="GyeongsangGoseongCgv01" id="cinema282">CGV 고성</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/김해시]</div>
+                                    <div><button class="btn" name="GyeongsangGimhaeCgv01" id="cinema283">CGV 김해</button></div>
+                                    <div><button class="btn" name="GyeongsangGimhaeCgv02" id="cinema284">CGV 김해율하</button></div>
+                                    <div><button class="btn" name="GyeongsangGimhaeCgv03" id="cinema285">CGV 김해장유</button></div>
+                                    <div><button class="btn" name="GyeongsangGimhaeLotte01" id="cinema286">롯데시네마 김해부원</button></div>
+                                    <div><button class="btn" name="GyeongsangGimhaeLotte02" id="cinema287">롯데시네마 김해아울렛</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/마산시]</div>
+                                    <div><button class="btn" name="GyeongsangMasanCgv01" id="cinema288">CGV 마산</button></div>
+                                    <div><button class="btn" name="GyeongsangMasanMega01" id="cinema289">메가박스 마산</button></div>
+                                    <div><button class="btn" name="GyeongsangMasanLotte01" id="cinema290">롯데시네마 마산터미널</button></div>
+                                    <div><button class="btn" name="GyeongsangMasanLotte02" id="cinema291">롯데시네마 프리미엄 경남대</button></div>
+
+                                    <div class="fw-bold">[경남/사천시]</div>
+                                    <div><button class="btn" name="GyeongsangSacheonLotte01" id="cinema292">롯데시네마 사천</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/양산시]</div>
+                                    <div><button class="btn" name="GyeongsangYangsanCgv01" id="cinema293">CGV 양산삼호</button></div>
+                                    <div><button class="btn" name="GyeongsangYangsanMega01" id="cinema294">메가박스 양산</button></div>
+                                    <div><button class="btn" name="GyeongsangYangsanMega02" id="cinema295">메가박스 양산증산</button></div>
+                                    <div><button class="btn" name="GyeongsangYangsanLotte01" id="cinema296">롯데시네마 양산물금</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/진주시]</div>
+                                    <div><button class="btn" name="GyeongsangJinjuCgv01" id="cinema297">CGV 진주혁신</button></div>
+                                    <div><button class="btn" name="GyeongsangJinjuMega01" id="cinema298">메가박스 진주(중안)</button></div>
+                                    <div><button class="btn" name="GyeongsangJinjuLotte01" id="cinema299">롯데시네마 엠비씨네 진주</button></div>
+                                    <div><button class="btn" name="GyeongsangJinjuLotte02" id="cinema300">롯데시네마 진주혁신점</button></div>
+
+                                    <div class="fw-bold mt-3">[경남/창원시]</div>
+                                    <div><button class="btn" name="GyeongsangChangwonCgv01" id="cinema301">CGV 창원</button></div>
+                                    <div><button class="btn" name="GyeongsangChangwonCgv02" id="cinema302">CGV 창원더시티</button></div>
+                                    <div><button class="btn" name="GyeongsangChangwonCgv03" id="cinema303">CGV 창원상남</button></div>
+                                    <div><button class="btn" name="GyeongsangChangwonMega01" id="cinema304">메가박스 창원</button></div>
+                                    <div><button class="btn" name="GyeongsangChangwonMega02" id="cinema305">메가박스 창원내서</button></div>
+                                    <div><button class="btn" name="GyeongsangChangwonLotte01" id="cinema306">롯데시네마 창원</button></div>
+
+                                    <div class="fw-bold">[경남/통원시]</div>
+                                    <div><button class="btn" name="GyeongsangTongwonLotte01" id="cinema307">롯데시네마 통원</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/경산시]</div>
+                                    <div><button class="btn" name="GyeongsangGyeongsanCgv01" id="cinema308">CGV 경산</button></div>
+                                    <div><button class="btn" name="GyeongsangGyeongsanMega01" id="cinema309">메가박스 경산하양</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/경주시]</div>
+                                    <div><button class="btn" name="GyeongsangGyeongjuMega01" id="cinema310">메가박스 경주</button></div>
+                                    <div><button class="btn" name="GyeongsangGyeongjuLotte01" id="cinema311">롯데시네마 경주</button></div>
+                                    <div><button class="btn" name="GyeongsangGyeongjuLotte02" id="cinema312">롯데시네마 경주황성</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/구미시]</div>
+                                    <div><button class="btn" name="GyeongsangGumiCgv01" id="cinema313">CGV 구미</button></div>
+                                    <div><button class="btn" name="GyeongsangGumiMega01" id="cinema314">메가박스 구미강동</button></div>
+                                    <div><button class="btn" name="GyeongsangGumiLotte01" id="cinema315">롯데시네마 구미공단</button></div>
+                                    <div><button class="btn text-start" name="GyeongsangGumiLotte01" id="cinema316">롯데시네마 프리미엄 구미센트럴</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/김천시]</div>
+                                    <div><button class="btn" name="GyeongsangGimcheonCgv01" id="cinema317">CGV 김천율곡</button></div>
+                                    <div><button class="btn" name="GyeongsangGimcheonMega01" id="cinema318">메가박스 김천</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/문경시]</div>
+                                    <div><button class="btn" name="GyeongsangMungyeongMega01" id="cinema319">메가박스 문경</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/상주시]</div>
+                                    <div><button class="btn" name="GyeongsangSangjuLotte01" id="cinema320">롯데시네마 상주</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/안동시]</div>
+                                    <div><button class="btn" name="GyeongsangAndongCgv01" id="cinema321">CGV 안동</button></div>
+                                    <div><button class="btn" name="GyeongsangAndongCLotte01" id="cinema322">롯데시네마 프리미엄 안동</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/영주시]</div>
+                                    <div><button class="btn" name="GyeongsangYeongjuLotte01" id="cinema323">롯데시네마 영주</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/영천시]</div>
+                                    <div><button class="btn" name="GyeongsangYeongcheonLotte01" id="cinema324">롯데시네마 영천</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/예천군]</div>
+                                    <div><button class="btn" name="GyeongsangYecheonMega01" id="cinema325">메가박스 경북도청</button></div>
+
+                                    <div class="fw-bold mt-3">[경북/포항시]</div>
+                                    <div><button class="btn" name="GyeongsangPohangCgv01" id="cinema326">CGV 북포항</button></div>
+                                    <div><button class="btn" name="GyeongsangPohangMega01" id="cinema327">메가박스 남포항</button></div>
+                                    <div><button class="btn" name="GyeongsangPohangMega01" id="cinema328">메가박스 포항</button></div>
+                                    <div><button class="btn" name="GyeongsangPohangLotte01" id="cinema329">롯데시네마 포항</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGwangju" aria-expanded="false" aria-controls="collapseGwangju">
+                                    광주
+                                </button>
+                            </h2>
+                            <div id="collapseGwangju" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[광주/광산구]</div>
+                                    <div><button class="btn" name="GwangjuGwangsanCgv01" id="cinema330">CGV 광주첨단</button></div>
+                                    <div><button class="btn" name="GwangjuGwangsanCgv02" id="cinema331">CGV 광주하남</button></div>
+                                    <div><button class="btn" name="GwangjuGwangsanMega01" id="cinema332">메가박스 광주하남</button></div>
+                                    <div><button class="btn" name="GwangjuGwangsanMega02" id="cinema333">메가박스 첨단</button></div>
+                                    <div><button class="btn" name="GwangjuGwangsanLotte01" id="cinema334">롯데시네마 광주광산</button></div>
+                                    <div><button class="btn" name="GwangjuGwangsanLotte02" id="cinema335">롯데시네마 수완점</button></div>
+
+                                    <div class="fw-bold mt-3">[광주/동구]</div>
+                                    <div><button class="btn" name="GwangjuDongCgv01" id="cinema336">CGV 광주금남로</button></div>
+                                    <div><button class="btn" name="GwangjuDongCgv02" id="cinema337">CGV 광주충장로</button></div>
+                                    <div><button class="btn" name="GwangjuDongLotte01" id="cinema338">롯데시네마 광주</button></div>
+                                    <div><button class="btn" name="GwangjuDongLotte02" id="cinema339">롯데시네마 충장로</button></div>
+
+                                    <div class="fw-bold mt-3">[광주/북구]</div>
+                                    <div><button class="btn" name="GwangjuBukCgv01" id="cinema340">CGV 광주용봉</button></div>
+                                    <div><button class="btn" name="GwangjuBukMega01" id="cinema341">메가박스 전대(광주)</button></div>
+
+                                    <div class="fw-bold mt-3">[광주/서구]</div>
+                                    <div><button class="btn" name="GwangjuSeoCgv01" id="cinema342">CGV 광주상무</button></div>
+                                    <div><button class="btn" name="GwangjuSeoCgv02" id="cinema343">CGV 광주터미널</button></div>
+                                    <div><button class="btn" name="GwangjuSeoMega01" id="cinema344">메가박스 광주상무</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJeolla" aria-expanded="false" aria-controls="collapseJeolla">
+                                    전라
+                                </button>
+                            </h2>
+                            <div id="collapseJeolla" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[전남/광양시]</div>
+                                    <div><button class="btn" name="JeollaGwangyangCgv01" id="cinema345">CGV 광양</button></div>
+                                    <div><button class="btn" name="JeollaGwangyangCgv02" id="cinema346">CGV 광양 엘에프스퀘어</button></div>
+
+                                    <div class="fw-bold mt-3">[전남/나주시]</div>
+                                    <div><button class="btn" name="JeollaNajuCgv01" id="cinema347">CGV 나주</button></div>
+
+                                    <div class="fw-bold mt-3">[전남/목포시]</div>
+                                    <div><button class="btn" name="JeollaMokpoCgv01" id="cinema348">CGV 목포</button></div>
+                                    <div><button class="btn" name="JeollaMokpoCgv02" id="cinema349">CGV 목포평화광장</button></div>
+                                    <div><button class="btn" name="JeollaMokpoMega01" id="cinema350">메가박스 목포하당(포르모)</button></div>
+
+                                    <div class="fw-bold mt-3">[전남/순천시]</div>
+                                    <div><button class="btn" name="JeollaSuncheonCgv01" id="cinema351">CGV 순천</button></div>
+                                    <div><button class="btn" name="JeollaSuncheonCgv02" id="cinema352">CGV 순천신대</button></div>
+                                    <div><button class="btn" name="JeollaSuncheonMega01" id="cinema353">메가박스 순천</button></div>
+
+                                    <div class="fw-bold mt-3">[전남/여수시]</div>
+                                    <div><button class="btn" name="JeollaYeosuCgv01" id="cinema354">CGV 여수웅천</button></div>
+                                    <div><button class="btn" name="JeollaYeosuMega01" id="cinema355">메가박스 여수웅천</button></div>
+
+                                    <div class="fw-bold mt-3">[전북/군산시]</div>
+                                    <div><button class="btn" name="JeollaGunsanLotte01" id="cinema356">롯데시네마 군산몰</button></div>
+                                    <div><button class="btn" name="JeollaGunsanLotte02" id="cinema357">롯데시네마 군산나운</button></div>
+
+                                    <div class="fw-bold mt-3">[전북/익산시]</div>
+                                    <div><button class="btn" name="JeollaIksanCgv01" id="cinema358">CGV 익산</button></div>
+                                    <div><button class="btn" name="JeollaIksanLotte01" id="cinema359">롯데시네마 익산모현</button></div>
+
+                                    <div class="fw-bold mt-3">[전북/전주시]</div>
+                                    <div><button class="btn" name="JeollaJeonjuCgv01" id="cinema360">CGV 서전주</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuCgv02" id="cinema361">CGV 전주고사</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuCgv03" id="cinema362">CGV 전주에코시티</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuCgv04" id="cinema363">CGV 전주효자</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuMega01" id="cinema364">메가박스 전주객사</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuMega02" id="cinema365">메가박스 전주송천</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuMega03" id="cinema366">메가박스 전주혁신</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuLotte01" id="cinema367">롯데시네마 전주</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuLotte02" id="cinema368">롯데시네마 전주송천</button></div>
+                                    <div><button class="btn" name="JeollaJeonjuLotte03" id="cinema369">롯데시네마 전주평화</button></div>
+
+                                    <div class="fw-bold mt-3">[전북/정읍시]</div>
+                                    <div><button class="btn" name="JeollaJeongeupCgv01" id="cinema370">CGV 정읍</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDaejeon" aria-expanded="false" aria-controls="collapseDaejeon">
+                                    대전
+                                </button>
+                            </h2>
+                            <div id="collapseDaejeon" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[동구]</div>
+                                    <div><button class="btn" name="DaejeonDongCgv01" id="cinema371">CGV 대전가오</button></div>
+                                    <div><button class="btn" name="DaejeonDongCgv02" id="cinema372">CGV 대전터미널</button></div>
+
+                                    <div class="fw-bold mt-3">[서구]</div>
+                                    <div><button class="btn" name="DaejeonSeoCgv01" id="cinema373">CGV 대전가수원</button></div>
+                                    <div><button class="btn" name="DaejeonSeoCgv02" id="cinema374">CGV 대전탄방</button></div>
+                                    <div><button class="btn" name="DaejeonSeoMega01" id="cinema375">메가박스 대전</button></div>
+                                    <div><button class="btn" name="DaejeonSeoLotte01" id="cinema376">롯데시네마 대전</button></div>
+                                    <div><button class="btn" name="DaejeonSeoLotte02" id="cinema377">롯데시네마 대전관저</button></div>
+                                    <div><button class="btn" name="DaejeonSeoLotte03" id="cinema378">롯데시네마 대전둔산</button></div>
+                                    <div><button class="btn" name="DaejeonSeoLotte04" id="cinema379">롯데시네마 대전센트럴</button></div>
+
+                                    <div class="fw-bold mt-3">[유성구]</div>
+                                    <div><button class="btn" name="DaejeonYuseongCgv01" id="cinema380">CGV 유성노은</button></div>
+                                    <div><button class="btn text-start" name="DaejeonYuseongMega01" id="cinema381">메가박스 대전신세계 아트앤사이언스</button></div>
+                                    <div><button class="btn" name="DaejeonYuseongMega02" id="cinema382">메가박스 대전유성</button></div>
+                                    <div><button class="btn" name="DaejeonYuseongMega03" id="cinema383">메가박스 대전현대아울렛</button></div>
+
+                                    <div class="fw-bold mt-3">[중구]</div>
+                                    <div><button class="btn" name="DaejeonJungCgv01" id="cinema384">CGV 대전</button></div>
+                                    <div><button class="btn" name="DaejeonJungMega01" id="cinema385">메가박스 대전중앙로</button></div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseChungcheong" aria-expanded="false" aria-controls="collapseChungcheong">
+                                    충청
+                                </button>
+                            </h2>
+                            <div id="collapseChungcheong" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[충남/공주시]</div>
+                                    <div><button class="btn" name="ChungcheongGongjuMega01" id="cinema386">메가박스 공주</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/논산시]</div>
+                                    <div><button class="btn" name="ChungcheongNonsanMega01" id="cinema387">CGV 논산</button></div>
+                                    <div><button class="btn" name="ChungcheongNonsanMega01" id="cinema388">메가박스 논산</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/당진시]</div>
+                                    <div><button class="btn" name="ChungcheongDangjinCgv01" id="cinema389">CGV 당진</button></div>
+                                    <div><button class="btn" name="ChungcheongDangjinLotte01" id="cinema390">롯데시네마 당진</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/서산시]</div>
+                                    <div><button class="btn" name="ChungcheongSeosanCgv01" id="cinema391">CGV 서산</button></div>
+                                    <div><button class="btn" name="ChungcheongSeosanLotte01" id="cinema392">롯데시네마 서산</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/아산시]</div>
+                                    <div><button class="btn" name="ChungcheongAsanCgv01" id="cinema393">CGV 아산</button></div>
+                                    <div><button class="btn" name="ChungcheongAsanLotte01" id="cinema394">롯데시네마 아산터미널점</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/세종시]</div>
+                                    <div><button class="btn" name="ChungcheongSejongCgv01" id="cinema395">CGV 세종</button></div>
+                                    <div><button class="btn" name="ChungcheongSejongMega01" id="cinema396">메가박스 세종(조치원)</button></div>
+                                    <div><button class="btn" name="ChungcheongSejongMega02" id="cinema397">메가박스 세종나성</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/천안시]</div>
+                                    <div><button class="btn" name="ChungcheongCheonanCgv01" id="cinema398">CGV 천안</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanCgv02" id="cinema399">CGV 천안시청</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanCgv03" id="cinema400">CGV 천안터미널</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanCgv04" id="cinema401">CGV 천안펜타포트</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanMega01" id="cinema402">메가박스 천안</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanLotte01" id="cinema403">롯데시네마 천안불당</button></div>
+                                    <div><button class="btn" name="ChungcheongCheonanLotte02" id="cinema404">롯데시네마 천안청당</button></div>
+
+                                    <div class="fw-bold mt-3">[충남/홍성군]</div>
+                                    <div><button class="btn" name="ChungcheongHongseongCgv01" id="cinema405">CGV 홍성</button></div>
+                                    <div><button class="btn" name="ChungcheongHongseongMega01" id="cinema406">메가박스 홍성내포</button></div>
+
+                                    <div class="fw-bold mt-3">[충북/음성군]</div>
+                                    <div><button class="btn" name="ChungcheongEumseongCgv01" id="cinema407">CGV 충북혁신</button></div>
+
+                                    <div class="fw-bold mt-3">[충북/제천시]</div>
+                                    <div><button class="btn" name="ChungcheongJecheonCgv01" id="cinema408">CGV 제천</button></div>
+
+                                    <div class="fw-bold mt-3">[충북/진천군]</div>
+                                    <div><button class="btn" name="ChungcheongJincheonMega01" id="cinema409">메가박스 진천</button></div>
+
+                                    <div class="fw-bold mt-3">[충북/청주시]</div>
+                                    <div><button class="btn" name="ChungcheongCheongjuCgv01" id="cinema410">CGV 청주(서문)</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuCgv02" id="cinema411">CGV 청주성안길</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuCgv03" id="cinema412">CGV 청주율량</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuCgv04" id="cinema413">CGV 청주지웰시티</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuCgv05" id="cinema414">CGV 청주터미널</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuMega01" id="cinema415">메가박스 오창</button></div>
+                                    <div><button class="btn" name="ChungcheongCheongjuMega02" id="cinema416">메가박스 청주사창</button></div>
+
+                                    <div class="fw-bold mt-3">[충북/충주시]</div>
+                                    <div><button class="btn" name="ChungcheongChungjuCgv01" id="cinema417">CGV 충주교현</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseGangwon" aria-expanded="false" aria-controls="collapseGangwon">
+                                    강원
+                                </button>
+                            </h2>
+                            <div id="collapseGangwon" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[강릉시]</div>
+                                    <div><button class="btn" name="GangwonGangneungCgv01" id="cinema418">CGV 강릉</button></div>
+
+                                    <div class="fw-bold">[동해시]</div>
+                                    <div><button class="btn" name="GangwonDonghaeLotte01" id="cinema419">롯데시네마 동해</button></div>
+
+                                    <div class="fw-bold mt-3">[속초시]</div>
+                                    <div><button class="btn" name="GangwonSokchoMega01" id="cinema420">메가박스 속초</button></div>
+                                    <div><button class="btn" name="GangwonSokchoLotte01" id="cinema421">롯데시네마 속초점</button></div>
+
+                                    <div class="fw-bold mt-3">[원주시]</div>
+                                    <div><button class="btn" name="GangwonWonjuCgv01" id="cinema423">CGV 원주</button></div>
+                                    <div><button class="btn" name="GangwonWonjuMega01" id="cinema424">메가박스 원주</button></div>
+                                    <div><button class="btn" name="GangwonWonjuMega02" id="cinema425">메가박스 원주센트럴</button></div>
+                                    <div><button class="btn" name="GangwonWonjuLotte01" id="cinema426">롯데시네마 남원주</button></div>
+                                    <div><button class="btn" name="GangwonWonjuLotte02" id="cinema427">롯데시네마 원주무실</button></div>
+
+                                    <div class="fw-bold mt-3">[인제군]</div>
+                                    <div><button class="btn" name="GangwonInjeCgv01" id="cinema428">CGV 기린</button></div>
+                                    <div><button class="btn" name="GangwonInjeCgv02" id="cinema429">CGV 원통</button></div>
+                                    <div><button class="btn" name="GangwonInjeCgv03" id="cinema430">CGV 인제</button></div>
+
+                                    <div class="fw-bold mt-3">[춘천시]</div>
+                                    <div><button class="btn" name="GangwonChuncheonCgv01" id="cinema431">CGV 춘천</button></div>
+                                    <div><button class="btn" name="GangwonChuncheonMega01" id="cinema432">메가박스 남춘천</button></div>
+                                    <div><button class="btn" name="GangwonChuncheonMega02" id="cinema433">메가박스 춘천석사</button></div>
+                                    <div><button class="btn" name="GangwonChuncheonLotte01" id="cinema434">롯데시네마 춘천</button></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed fw-bold fs-5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseJeju" aria-expanded="false" aria-controls="collapseJeju">
+                                    제주
+                                </button>
+                            </h2>
+                            <div id="collapseJeju" class="accordion-collapse collapse" data-bs-parent="#accordionLocation">
+                                <div class="accordion-body">
+                                    <div class="fw-bold">[제주시]</div>
+                                    <div><button class="btn" name="JejuJejuCgv01" id="cinema435">CGV 제주</button></div>
+                                    <div><button class="btn" name="JejuJejuCgv02" id="cinema436">CGV 제주노형</button></div>
+                                    <div><button class="btn" name="JejuJejuLotte01" id="cinema437">롯데시네마 제주삼화지구</button></div>
+                                    <div><button class="btn" name="JejuJejuLotte02" id="cinema438">롯데시네마 제주아라</button></div>
+                                    <div><button class="btn" name="JejuJejuLotte03" id="cinema439">롯데시네마 제주연동</button></div>
+
+                                    <div class="fw-bold mt-3">[서귀포시]</div>
+                                    <div><button class="btn" name="JejuSeogwipoLotte01" id="cinema440">롯데시네마 서귀포</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="rounded text-center fw-bold py-2 mb-3 fs-5" style="background-color: #28323C">
+                        <div>날짜 선택</div>
+                    </div>
+                    <div type="text" id="calendar" class="datepicker mr-2" name="date" style="display: none;"></div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                <div class="rounded text-center fw-bold py-2 mb-3 fs-5" style="background-color: #28323C">
+                    <div>영화/시간 선택</div>
+                </div>
+                <div style="height: 450px; overflow: auto; overflow-x: hidden;" class="scrollbar">
+                    <div class="text-light fs-4 fw-bold" id="selectedCinema"></div>
+                    <div id="scheduleContainer" class="row"></div>
+                </div>
+                <div class="rounded text-center fw-bold py-2 mb-3 fs-5 mt-4" style="background-color: #28323C">
+                    <div>관람 인원 선택</div>
+                </div>
+                <div id="moviegoerContainer" style="visibility: hidden;">
+                    <div class="row">
+                        <div class="col-3 fs-5 text-end">성인(15,000원)</div>
+                        <div class="col-2">
+                            <select class="form-select form-select-sm" aria-label="adultNumSelect" id="adultNumSelect">
+                                <option value="0" selected>0명</option>
+                                <option value="1">1명</option>
+                                <option value="2">2명</option>
+                                <option value="3">3명</option>
+                                <option value="4">4명</option>
+                            </select>
+                        </div>
+                        <div class="col-4 fs-5 text-end">청소년(12,000원)</div>
+                        <div class="col-2">
+                            <select class="form-select form-select-sm" aria-label="teenNumSelect" id="teenNumSelect">
+                                <option value="0" selected>0명</option>
+                                <option value="1">1명</option>
+                                <option value="2">2명</option>
+                                <option value="3">3명</option>
+                                <option value="4">4명</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-5" id="go2SelectSeat" style="visibility: hidden;">
+                        <th:block th:if="${not #strings.isEmpty(session.UID)}">
+                            <button class="offset-9 col-3 btn btn-info btn-lg fw-bold" data-bs-toggle="modal" data-bs-target="#selectSeatModal" id="go2modal">좌석 선택</button>
+                        </th:block>
+                        <th:block th:if="${#strings.isEmpty(session.UID)}">
+                            <button class="offset-9 col-3 btn btn-info btn-lg fw-bold" id="withoutLogin">좌석 선택</button>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-3">
+                <div class="rounded text-center fw-bold py-2 mb-3 fs-5" style="background-color: #28323C">
+                    <div>예매 정보</div>
+                </div>
+                <div class="text-center" id="selectedMoviePoster" style="height: 27%;">
+                    <!-- <img src="/static/img/ticket/no_img.png" class="img-fluid" style="height: 100%;"> -->
+                </div>
+                <div class="fs-4 fw-bold mt-2"><span id="selectedMovieRating"></span> <span id="selectedMovieTitle"></span></div>
+                <div class="mt-2" style="font-size: 19px;"> <span id="selectedPlace"></span> <span id="selectedTheater"></span></div>
+                <div class="mt-1" style="font-size: 19px;"> <span id="selectedDate"></span> <span id="selectedDayOfWeek"></span> <span id="selectedTime"></span></div>
+                <div class="mt-1" style="font-size: 19px;"> <span id="selectedAdult"></span> <span id="selectedTeen"></span></div>
+                <div class="mt-1" style="font-size: 19px;"> <span id="selectedSeat"></span></div>
+                <div class="row" style="margin-top: 23%; visibility: hidden;" id="priceContainer">
+                    <span class="col fs-5 pt-1" id="priceDescription">총 금액</span>
+                    <span class="col text-warning fs-4 justify-content-end text-end" id="selectedPrice"></span>
+                </div>
+            </div>
+        </div>
+
+        <form id="bkfrm" name="bkfrm">
+            <input type="hidden" id="bookingNum" name="bookingNum">
+            <input type="hidden" id="userid" name="userid" th:value="${session.UID}">
+            <input type="hidden" id="title" name="title">
+            <input type="hidden" id="cinemaType" name="cinemaType">
+            <input type="hidden" id="region" name="region">
+            <input type="hidden" id="theater" name="theater">
+            <input type="hidden" id="adult" name="adult">
+            <input type="hidden" id="teen" name="teen">
+            <input type="hidden" id="seats" name="seats">
+            <input type="hidden" id="viewingDay" name="viewingDay">
+            <input type="hidden" id="paymentDate" name="paymentDate">
+            <input type="hidden" id="totalPrice" name="totalPrice">
+        </form>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="selectSeatModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="selectSeatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content text-light" style="background-color: #161F30;">
+                <div class="modal-header row mx-0" style="border-bottom: 1px solid #161F30;">
+                    <h3 class="modal-title col text-center border border-light" id="selectSeaatModalLabel">S C R E E N</h3>
+                </div>
+                <div class="modal-body mt-3">
+                    <div class="row">
+                        <div class="col-1 fs-5 text-end">
+                            <div class="mt-1">A</div>
+                            <div class="mt-2">B</div>
+                            <div class="mt-2">C</div>
+                            <div class="mt-2">D</div>
+                            <div class="mt-2">E</div>
+                            <div class="mt-2">F</div>
+                            <div class="mt-2">G</div>
+                            <div class="mt-2">H</div>
+                            <div class="mt-2">I</div>
+                            <div class="mt-2">J</div>
+                        </div>
+                        <div class="col-10 fs-5 text-center" id="seatsContainer"></div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #161F30;">
+                    <!-- <button type="button" class="btn btn-danger fw-bold col-2" id="saveTest">test</button> -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="ticketCancel">선택 취소</button>
+                    <button type="button" class="btn btn-info fw-bold" id="ticketApproval">선택 완료</button>
+                    <input type="hidden" id="moviegoersValue">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+    <script th:inline="javascript">
+        // 카카오페이 결제
+        let bkfrm = document.forms.bkfrm;
+        var IMP = window.IMP;
+        IMP.init("imp43105688");
+
+        var today = new Date();
+        var hours = today.getHours(); // 시
+        var minutes = today.getMinutes();  // 분
+        var seconds = today.getSeconds();  // 초
+        var milliseconds = today.getMilliseconds();
+        var makeMerchantUid = hours +  minutes + seconds + milliseconds;
+
+        function requestPay(bookingTitle, bookingCinema, bookingTheater, bookingDay, bookingPay) {
+            IMP.request_pay({
+                pg : 'kakaopay',
+                pay_method : 'card',
+                merchant_uid: "IMP" + makeMerchantUid,
+                name : `[CMeLot] ${bookingTitle} ${bookingCinema} ${bookingTheater} ${bookingDay}`,
+                amount : bookingPay,
+                buyer_email : 'CMeLot@email.com',
+                buyer_name : 'CMeLot',
+                buyer_tel : '010-1234-5678',
+                buyer_addr : '서울특별시',
+                // 매번 결제 할 떄마다 buyer_postcode를 바꿔야 작동함
+                buyer_postcode : '111-135',
+            }, function(rsp) {
+                // 결제검증
+                $.ajax({
+                  type : "POST",
+                  url : "/ticket/verifyIamport/" + rsp.imp_uid
+                }).done(function(data) {
+
+                    // 위의 rsp.paid_amount 와 data.response.amount를 비교한후 로직 실행 (import 서버검증)
+                    if(rsp.paid_amount == data.response.amount){
+                        let regdate = document.createElement("input");
+                        regdate.type = "hidden";
+                        regdate.value = new Date() + makeMerchantUid;
+                        // bkfrm.rsp.value = rsp.imp_uid
+                        bkfrm.method = "post";
+                        bkfrm.action = "/ticket/booking";
+                        bkfrm.submit();
+                    } else {
+                        alert("결제 실패");
+                    }
+                });
+            });
+        }
+
+        const calendar = document.querySelector('#calendar');
+
+        const selectedMoviePoster = document.querySelector('#selectedMoviePoster');
+        const selectedMovieRating = document.querySelector('#selectedMovieRating');
+        const selectedMovieTitle = document.querySelector('#selectedMovieTitle');
+        const selectedPlace = document.querySelector('#selectedPlace');
+        const selectedTheater = document.querySelector('#selectedTheater');
+        const selectedDate = document.querySelector('#selectedDate');
+        const selectedDayOfWeek = document.querySelector('#selectedDayOfWeek');
+        const selectedTime = document.querySelector('#selectedTime');
+        const selectedCinema = document.querySelector('#selectedCinema');
+        const selectedAdult = document.querySelector('#selectedAdult');
+        const selectedTeen = document.querySelector('#selectedTeen');
+
+        const scheduleContainer = document.querySelector('#scheduleContainer');
+
+        const schList = /*[[${schList}]]*/ false;
+
+        const go2SelectSeat = document.querySelector('#go2SelectSeat');
+        const priceContainer = document.querySelector('#priceContainer');
+        const selectedPrice = document.querySelector('#selectedPrice');
+        const priceDescription = document.querySelector('#priceDescription');
+
+        const moviegoersValue = document.querySelector('#moviegoersValue');
+
+        let seatsArray = [];
+        let ticketCancel = document.querySelector('#ticketCancel');
+        let go2modal = document.querySelector('#go2modal');
+
+        let getDayOfWeek = (date) => {
+            const week = ['일', '월', '화', '수', '목', '금', '토'];
+        
+            const dayOfWeek = week[new Date(date).getDay()];
+        
+            return dayOfWeek
+        }
+
+        // 좌석 만들기
+        const seatsContainer = document.querySelector('#seatsContainer');
+        const alphabet = 'ABCDEFGHIJ';
+        for (const letter of alphabet) {
+            for(let j = 1; j <= 4; j++) {
+                seatsContainer.innerHTML += `
+                    <button class="btn text-light border border-light oneSeat" value="${letter}">${j}</button>
+                `;
+            }
+            seatsContainer.innerHTML += `<button class="btn text-light border border-light oneSeat" value="${letter}" style="margin-left: 5%">5</button>`;
+            for(let j = 6; j <= 14; j++) {
+                seatsContainer.innerHTML += `
+                    <button class="btn text-light border border-light oneSeat" value="${letter}">${j}</button>
+                `;
+            }
+            seatsContainer.innerHTML += `<button class="btn text-light border border-light oneSeat" value="${letter}" style="margin-left: 5%">15</button>`;
+            for(let j = 16; j <= 18; j++) {
+                seatsContainer.innerHTML += `
+                    <button class="btn text-light border border-light oneSeat" value="${letter}">${j}</button>
+                `;
+            }
+            seatsContainer.innerHTML += `<br>`;
+        }
+
+        $(document).ready(function(){
+            $('.datepicker').datepicker({
+                language: 'ko',
+                format: 'yyyy-mm-dd',
+                todayHighlight: true,
+                toggleActive: true,
+                startDate: 'd',
+                endDate: '+10d'
+            })
+            .on('changeDate', function (e) {
+                let formattedDate = e.date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            
+                scheduleContainer.innerText = '';
+                selectedMoviePoster.innerText = '';
+                selectedMovieRating.innerText = '';
+                selectedMovieTitle.innerText = '';
+                selectedTheater.innerText = '';
+                selectedTime.innerText = '';
+                selectedAdult.innerText = '';
+                selectedTeen.innerText = '';
+
+                moviegoerContainer.style.visibility = 'hidden';
+                go2SelectSeat.style.visibility = 'hidden';
+                priceContainer.style.visibility = 'hidden';
+            
+                adultNumSelect.value = 0;
+                teenNumSelect.value = 0;
+            
+                const year = formattedDate.substring(0, 4);
+                const month = formattedDate.substring(6, 8);
+                const date = formattedDate.substring(10, 12);
+            
+                const convertedDate = year + "-" + month + "-" + date;
+            
+                selectedDate.innerText = convertedDate;
+                selectedDayOfWeek.innerText = '(' + getDayOfWeek(convertedDate) + ')';
+            
+                const groupedMovies = {};
+            
+                for (let i = 0; i < schList.length; i++) {
+                    let cinemaName = schList[i].cinemaType + ' ' + schList[i].region;
+                    let screeningDate = schList[i].screeningDate;
+                
+                    if((cinemaName === selectedCinema.innerText) && (screeningDate === selectedDate.innerText)) {
+                        const title = schList[i].title;
+                        const rating = schList[i].rating;
+                    
+                        if (!groupedMovies[title]) {
+                            groupedMovies[title] = [];
+                        }
+                    
+                        groupedMovies[title].push(schList[i]);
+                    }
+                }
+            
+                for (const title in groupedMovies) {
+                    const titleDiv = document.createElement("div");
+                
+                    const movies = groupedMovies[title];
+                    const rating = movies[0].rating;
+                
+                    const imagePath = `/static/img/${rating}.png`;
+                
+                    titleDiv.innerHTML = `
+                        <div class="mt-4">
+                            <img src="${imagePath}" class="img-fluid">
+                            <span class="fs-5 fw-bold" style="vertical-align: middle">${title}</span>
+                        </div>
+                    `;
+                    scheduleContainer.appendChild(titleDiv);
+                    
+                    const moviesContainer = document.createElement("div");
+                    moviesContainer.className = 'pe-0';
+
+                    for (const movie of movies) {
+                        const button = document.createElement("button");
+                    
+                        button.className = "movie-button btn rounded text-light col-3 me-3 mt-3";
+                        button.style.backgroundColor = "#28323C";
+                    
+                        button.innerHTML = `
+                            <div class="px-1">
+                                <div class="fs-5 text-center mb-1">${movie.startTime} ~ ${movie.endTime}</div>
+                                <div class="text-end me-2 theater">${movie.theater}관</div>
+                            </div>
+                        `;
+                        
+                        button.addEventListener("click", () => {
+                            const theaterDiv = button.querySelector(".theater");
+                            const theaterValue = theaterDiv.textContent;
+
+                            const buttonText = button.innerText;
+                            const buttonTextTime = buttonText.substring(0, 5);
+                        
+                            selectedTheater.innerText = theaterValue;
+                            selectedTime.innerText = ' ' + buttonTextTime;
+                            selectedMoviePoster.innerHTML = `<img src="/static/img/${title}.jpg" class="img-fluid" style="height: 100%;">`;
+                            selectedMovieRating.innerHTML = `<img src="/static/img/${rating}.png" class="img-fluid">`;
+                            selectedMovieTitle.innerText = `${title}`;
+                        
+                            const moviegoerContainer = document.querySelector('#moviegoerContainer');
+                            if(selectedTime.innerText !== '') {
+                                moviegoerContainer.style.visibility = 'visible';
+                            }
+                        
+                            const adultNumSelect = document.querySelector('#adultNumSelect');
+                            const teenNumSelect = document.querySelector('#teenNumSelect');
+
+                            go2modal?.addEventListener('click', () => {
+                                const adultPrice = adultNumSelect.value * 15000;
+                                const teenPrice = teenNumSelect.value * 12000;
+                                const totalMoviegoers = parseInt(adultNumSelect.value) + parseInt(teenNumSelect.value);
+                                const totalPrice = (adultPrice + teenPrice).toLocaleString('ko-KR');
+                            
+                                moviegoersValue.value = totalMoviegoers;
+                            
+                                priceDescription.innerText = '총 금액';
+                                selectedPrice.innerText = totalPrice + '원';
+
+                                const oneSeatElements = document.querySelectorAll('.oneSeat');
+                                let count = 0;
+                                const maxSelectableSeats = moviegoersValue.value;
+
+                                oneSeatElements.forEach(oneSeat => {
+                                    ticketCancel?.addEventListener('click', () => {
+                                        oneSeat.style.backgroundColor = '#161f30';
+                                        oneSeat.className = 'btn text-light border border-light oneSeat';
+                                        seatsArray = [];
+                                    })
+                                    let isChanged = false;
+                                    oneSeat.addEventListener('click', () => {
+                                        if(count >= maxSelectableSeats) {
+                                            if(isChanged) {
+                                                oneSeat.style.backgroundColor = '#161f30';
+                                                oneSeat.className = 'btn text-light border border-light oneSeat';
+                                                count--;
+                                                const indexToRemove = seatsArray.indexOf(oneSeat.value + oneSeat.innerText);
+                                                if (indexToRemove !== -1) {
+                                                    seatsArray.splice(indexToRemove, 1);
+                                                }
+                                                isChanged = false;
+                                            }
+                                        } else {
+                                            if(isChanged) {
+                                                oneSeat.style.backgroundColor = '#161f30';
+                                                oneSeat.className = 'btn text-light border border-light oneSeat';
+                                                count--;
+                                                const indexToRemove = seatsArray.indexOf(oneSeat.value + oneSeat.innerText);
+                                                if (indexToRemove !== -1) {
+                                                    seatsArray.splice(indexToRemove, 1);
+                                                }
+                                                isChanged = false;
+                                            } else if(!isChanged) {
+                                                oneSeat.style.backgroundColor = '#5bc0de';
+                                                oneSeat.className = 'btn text-dark border border-light oneSeat';
+                                                count++;
+                                                seatsArray.push(`${oneSeat.value}${oneSeat.innerText}`)
+                                                isChanged = true;
+                                            }
+                                        }
+                                    });
+                                });
+                            })
+
+                            adultNumSelect?.addEventListener('change', () => {
+                                if (adultNumSelect.value === '0' && teenNumSelect.value === '0') {
+                                    selectedAdult.innerText = '';
+                                    go2SelectSeat.style.visibility = 'hidden';
+                                    priceContainer.style.visibility = 'hidden';
+                                } else {
+                                    selectedAdult.innerText = '성인' + adultNumSelect.value + '명';
+                                    go2SelectSeat.style.visibility = 'visible';
+                                    priceContainer.style.visibility = 'visible';
+                                }
+                            })
+                            teenNumSelect?.addEventListener('change', () => {
+                                if (teenNumSelect.value === '0' && adultNumSelect.value === '0') {
+                                    selectedTeen.innerText = '';
+                                    go2SelectSeat.style.visibility = 'hidden';
+                                    priceContainer.style.visibility = 'hidden';
+                                } else {
+                                    selectedTeen.innerText = '청소년' + teenNumSelect.value + '명';
+                                    go2SelectSeat.style.visibility = 'visible';
+                                    priceContainer.style.visibility = 'visible';
+                                }
+                            })
+                        });
+                    
+                        button.addEventListener('mousedown', () => {
+                            button.style.border = '1px solid #5bc0de';
+                        })
+
+                        button.addEventListener('mouseup', () => {
+                            button.style.border = 'none';
+                        })
+                    
+                        moviesContainer.appendChild(button);                    
+                    }
+                
+                    scheduleContainer.appendChild(moviesContainer);
+                }
+            });
+        });
+
+        let withoutLogin = document.querySelector('#withoutLogin');
+        withoutLogin?.addEventListener('click', () => {
+            alert('로그인이 필요한 서비스입니다');
+        })
+
+        for(let i = 1; i <= 440; i++) {
+            let movieTheaters = document.querySelector('#cinema' + [i]);
+        
+            movieTheaters?.addEventListener('click', () => {
+                calendar.style.display = 'block';
+                moviegoerContainer.style.visibility = 'hidden';
+            
+                selectedDate.innerText = '';
+                selectedDayOfWeek.innerText = '';
+                selectedTime.innerText = '';
+                selectedTheater.innerText = '';
+                selectedAdult.innerText = '';
+                selectedTeen.innerText = '';
+                selectedPrice.innerText = '';
+                priceDescription.innerText = '';
+            
+                adultNumSelect.selectedIndex = 0;
+                teenNumSelect.selectedIndex = 0;
+            
+                selectedPlace.innerText = movieTheaters.innerText;
+                selectedCinema.innerText = movieTheaters.innerText;
+                scheduleContainer.innerHTML = '';
+                $(".datepicker").datepicker("setDate", null);
+            })
+        }
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
+        }
+
+        let pd = formatDate(new Date());
+
+        let ticketApproval = document.querySelector("#ticketApproval");
+        ticketApproval.addEventListener('click', () => {
+            let bookingTitle = selectedMovieTitle.innerText;
+            let bookingCinema = selectedCinema.innerText;
+            let bookingTheater = selectedTheater.innerText;
+            let bookingDay = selectedDate.innerText + ' ' + selectedTime.innerText;
+            let bookingSeat = seatsArray;
+            let bookingPay = selectedPrice.innerText;
+            let bookingAdult = adultNumSelect.value;
+            let bookingTeen = teenNumSelect.value;
+            
+            let bookingNum = document.querySelector('#bookingNum');
+            let title = document.querySelector('#title');
+            let cinemaType = document.querySelector('#cinemaType');
+            let region = document.querySelector('#region');
+            let theater = document.querySelector('#theater');
+            let adult = document.querySelector('#adult');
+            let teen = document.querySelector('#teen');
+            let seats = document.querySelector('#seats');
+            let viewingDay = document.querySelector('#viewingDay');
+            let paymentDate = document.querySelector('#paymentDate');
+            let totalPrice = document.querySelector('#totalPrice');
+            
+            let firstLetter = bookingCinema.substring(0, 1);
+            let ct = '';
+            let rg = '';
+            if(firstLetter === 'C') {
+                ct = 'CGV';
+                rg = bookingCinema.substring(4);
+            } else if(firstLetter === '메') {
+                ct = '메가박스';
+                rg = bookingCinema.substring(5);
+            } else if(firstLetter === '롯') {
+                ct = '롯데시네마';
+                rg = bookingCinema.substring(6);
+            }
+
+            let bp = bookingPay.slice(0, -1);
+            let bp1 = bp.slice(-3);
+            let bp2 = '';
+
+            if(bp.length === 6) {
+                bp2 = bp.slice(0, 2)
+            } else if(bp.length === 7) {
+                bp2 = bp.slice(0, 3)
+            }
+            let finalPrice = parseInt(bp2 + bp1);
+
+            // 예매 번호 생성
+            let now = new Date();
+            let thisYear = String(now.getFullYear()).substring(2);
+            let thisMonth = String(now.getMonth() + 1).padStart(2, '0');
+            let thisDate = String(now.getDate()).padStart(2, '0');
+            let finalDate = thisYear + thisMonth + thisDate;
+
+            let num1 = String(parseInt((parseInt(finalDate) / 50) * 100)).substring(2);
+
+            let num2 = parseInt(Math.random() * 1000);
+            
+            while(num2 < 100) {
+                num2 = parseInt(Math.random() * 1000);
+            }
+
+            let thisHour = String(now.getHours()).padStart(2, '0');
+            let thisMinutes = String(now.getMinutes()).padStart(2, '0');
+            let thisSeconds = String(now.getSeconds()).padStart(2, '0');
+            let num3 = String(parseInt(parseInt(thisSeconds + thisMinutes + thisHour) / 60)).padStart(4, '0');
+
+            let finalNum = num1 + '-' + num2 + '-' + num3;
+        
+            bookingNum.value = finalNum;
+            title.value = bookingTitle;
+            cinemaType.value = ct;
+            region.value = rg;
+            theater.value = bookingTheater;
+            adult.value = bookingAdult;
+            teen.value = bookingTeen;
+            seats.value = bookingSeat;
+            viewingDay.value = bookingDay;
+            paymentDate.value = pd;
+            totalPrice.value = finalPrice;
+
+            if(seatsArray.length != moviegoersValue.value) {
+                alert(moviegoersValue.value + '자리 이상 선택해야 합니다.');
+            } else {
+                requestPay(bookingTitle, bookingCinema, bookingTheater, bookingDay, bookingPay)
+            }
+        })
+    </script>
+
+</th:block>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="htttp://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+    <div id="main">
+
+        <div class="row justify-content-center" id="videoWrap">
+            <video autoplay="true" id="indexMovie">
+                <source src="https://adimg.cgv.co.kr/images/202308/sleep/0821_sleep_PC_1080x608.mp4" type="video/mp4">
+            </video>
+            <strong class="indexMovieTitle">잠</strong>
+            <div class="indexMovieController mt-3">
+                <a href="/movie/view?mvno=23" class="indexMovieDetailView">
+                    상세보기 <i class="fa-solid fa-chevron-right" style="color: #343434;"></i>
+                </a>
+                <a href="#" class="indexMoviePlayStop" id="indexMoviePlayStop" onclick="showPlayNStop()">
+                    <i class="fa-solid fa-pause" style="color: #343434; margin-left: 30%;"></i>
+                </a>
+                <a href="#" class="indexMovieSound" id="indexMovieSound" onclick="showMovieSound()">
+                    <i class="fa-solid fa-volume-high" style="color: #343434; margin-left: 5px;"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="offset-5 col-2 text-light fs-4 text-center border-bottom border-light pb-2">박스오피스</div>
+            <div class="offset-2 col-3 text-light fs-4 text-end">
+                <a href="/movie/all" style="text-decoration: none; color: white;">더 많은 영화보기
+                    <i class="fa-solid fa-plus" style="color: #ffffff;"></i></a>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div th:each="top5:${top5List}" style="width: 20%;">
+                <a th:href="|/movie/view?mvno=${top5.mvno}|">
+                    <!-- <img th:src="|/static/img/${top5.title}.jpg|" class="img-fluid rounded" style="width: 100%"> -->
+                    <img th:src="${top5.poster}" class="img-fluid rounded" style="width: 100%">
+                </a>
+                <div class="row mt-2 justify-content-center ms-0 me-0 ps-0 pe-0">
+                    <div class="col-auto mt-1">
+                        <th:block th:if="${top5.rating} eq 'all'">
+                            <img src="/static/img/all.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${top5.rating} eq '12'">
+                            <img src="/static/img/12.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${top5.rating} eq '15'">
+                            <img src="/static/img/15.png" class="img-fluid">
+                        </th:block>
+                        <th:block th:if="${top5.rating} eq '18'">
+                            <img src="/static/img/18.png" class="img-fluid">
+                        </th:block>
+                    </div>
+                    <div class="col-auto text-light text-center fw-bold fs-5 ps-0" 
+                            th:text="${#strings.length(top5.title) &gt; 9 ? #strings.substring(top5.title, 0, 8) + '...' : top5.title}"></div>
+                </div>
+                <div class="row mt-2 align-items-center ms-0 me-0 ps-0 pe-0">
+                    <div class="col-6 text-light fs-5">
+                        <i class="fa-solid fa-ticket" style="color: #ffffff;"></i>
+                        <span th:text="|${top5.reservationRate}%|"></span>
+                    </div>
+                    <button class="btn btn-info fw-bold col-6 go2booking">예매하기</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', () => {
+        let go2bookingButtons = document.querySelectorAll('.go2booking');
+            go2bookingButtons?.forEach(button => {
+                button.addEventListener('click', () => {
+                    location.href = '/ticket/booking';
+                });
+            });
+        });
+    </script>
+
+</th:block>
+
+</html>

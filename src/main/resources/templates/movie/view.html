@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="htttp://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+    <style>
+        #reviewFrm fieldset{
+            display: inline-block;
+            direction: rtl;
+            border:0;
+        }
+        #reviewFrm fieldset legend{
+            text-align: right;
+        }
+        #reviewFrm input[type=radio]{
+            display: none;
+        }
+        #reviewFrm label{
+            font-size: 3em;
+            color: transparent;
+            text-shadow: 0 0 0 #f0f0f0;
+        }
+        #reviewFrm label:hover{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+        #reviewFrm label:hover ~ label{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+        #reviewFrm input[type=radio]:checked ~ label{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        .fieldset{
+            display: inline-block;
+            direction: rtl;
+            border:0;
+        }
+        .fieldset legend{
+            text-align: right;
+        }
+        .fieldset input[type=radio]{
+            display: none;
+        }
+        .fieldset label{
+            font-size: 3em;
+            color: transparent;
+            text-shadow: 0 0 0 #f0f0f0;
+        }
+        .fieldset label:hover{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+        .fieldset label:hover ~ label{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+        .fieldset input[type=radio]:checked ~ label{
+            text-shadow: 0 0 0 rgba(250, 208, 0, 0.99);
+        }
+
+        /* 스크롤바 */
+        .scrollbar { 
+          width: 100%;
+          height: 250px;
+          overflow-y: scroll; /*  */
+        }
+
+        /* 스크롤바의 폭 너비 */
+        .scrollbar::-webkit-scrollbar {
+            width: 10px;  
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: #5bc0de; /* 스크롤바 색상 */
+            border-radius: 10px; /* 스크롤바 둥근 테두리 */
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: #5bc0de30; /*스크롤바 뒷 배경 색상*/
+        }
+    </style>
+
+    <div id="main" class="row mt-2">
+
+        <div class="col">
+            <div class="row mt-5 text-light">
+                <div class="col-4">
+                    <img th:src="${film.poster}" class="img-fluid rounded" style="width: 100%" >
+                </div>
+                <div class="col-8 ps-5 fs-4">
+                    <h1 th:text="${film.title}" class="mt-5 fw-bold"></h1>
+                    <div class="mt-3">
+                        <span th:text="${film.openingDay}" class="fw-bold"></span>
+                        <span>개봉 | </span>
+                        <span>
+                            <i class="fa-regular fa-clock" style="color: #ffffff;"></i>
+                            <span th:text="${film.runningTime}" class="fw-bold"></span>분 |
+                        </span>
+                        <th:block th:if="${film.rating} eq 'all'">
+                            <span class="fw-bold" style="color: #249b58;">전체관람가</span>
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '12'">
+                            <span class="fw-bold" style="color: #e8b62f;">12세이상관람가</span>
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '15'">
+                            <span class="fw-bold" style="color: #dd7430;">15세이상관람가</span>
+                        </th:block>
+                        <th:block th:if="${film.rating} eq '18'">
+                            <span class="fw-bold" style="color: #be373f;">18세이상관람가</span>
+                        </th:block>
+                    </div>
+                    <div class="mt-5 scrollbar fs-4">
+                        <div th:each="sen : ${#strings.listSplit(film.movieStory, '/')}">
+                            <div th:text="${sen}"></div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-info btn-lg col-6 fw-bold fs-3" type="button" id="go2ticketing">예매하기</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 text-light">
+                <h2 class="mb-4">영화정보</h2>
+                <ul class="fs-4">
+                    <li class="mb-3" th:text="|장르 : ${film.genre}|"></li>
+                    <li class="mb-3" th:text="|감독 : ${film.director}|"></li>
+                    <li class="mb-3" th:text="|출연 : ${film.actors}|"></li>
+                </ul>
+            </div>
+        
+            <div class="mt-5 text-light">
+                <h2>트레일러</h2>
+                <div class="mt-4">
+                    <iframe width="100%" height="720" th:src="${film.trailer}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+            </div>
+        
+            <div class="mt-5 text-light" id="stillcutContainer">
+                <h2>스틸컷</h2>
+                <div id="carouselStillcut" class="carousel slide">
+                    <div class="carousel-inner">
+                        <th:block th:each="still, status : ${stillList}">
+                            <div th:classappend="${status.first} ? 'carousel-item active' : 'carousel-item'">
+                                <img th:src="${still.imageUrl}" class="d-block w-100" alt="...">
+                            </div>
+                        </th:block>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselStillcut" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselStillcut" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div> <!--스틸컷-->
+                
+            <div class="row mt-5">
+                <h2 class="text-light">관람평</h2>
+                <div class="col-12">
+                    <form name="reviewFrm" id="reviewFrm" class="p-3">
+                        <fieldset class="fieldset2">
+                            <span class="text-bold text-light">별점을 선택해주세요</span>
+                            <input type="radio" name="star" value="5" id="rate1"><label
+                                for="rate1">★</label>
+                            <input type="radio" name="star" value="4" id="rate2"><label
+                                for="rate2">★</label>
+                            <input type="radio" name="star" value="3" id="rate3"><label
+                                for="rate3">★</label>
+                            <input type="radio" name="star" value="2" id="rate4"><label
+                                for="rate4">★</label>
+                            <input type="radio" name="star" value="1" id="rate5"><label
+                                for="rate5">★</label>
+                        </fieldset>
+                        <div class="row align-items-center">
+                            <div>
+                                <textarea id="reviewContent" name="reviewContent" rows="5" class="form-control" style="resize: none;"
+                                            placeholder="평점 및 영화 관람평을 작성해주세요. (최소 10글자 이상)" maxlength="200"></textarea>
+                                <div class="bg-light text-dark text-end" id="charCount">0 / 200</div>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="button" class="btn btn-info mt-3 fw-bold col-2" id="newReviewBtn">등록</button>
+                            </div>
+                            <input type="hidden" name="userid" id="userid" th:value="${session.UID}">
+                            <input type="hidden" name="mvno" id="mvno" th:value="${film.mvno}">
+                            <!-- <input type="hidden" name="reviewRegdate" id="reviewRegdate"> -->
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- <div class="row mt-5" th:each="rv : ${rvList}" id="reviewContainer"> -->
+            <div class="row mt-5" id="reviewContainer">
+                <!-- <div class="col-1">
+                    <img src="../static/img/popcorn.png" style="width: 90%;">
+                </div>
+                <div class="col-11">
+                    <div>
+                        <th:block th:if="${rv.userid} eq ${session.UID}">
+                            <span th:text="${rv.userid}" style="color: #5bc0de"></span>
+                        </th:block>
+                        <th:block th:if="${rv.userid} ne ${session.UID}">
+                            <span th:text="|${#strings.substring(rv.userid, 0, 2)}**${#strings.substring(rv.userid, 4)}|" style="color: #5bc0de"></span>
+                        </th:block>
+                        <span th:each="i : ${#numbers.sequence(1, rv.star)}" style="color: rgba(250, 208, 0, 0.99)">★</span>
+                        <th:block th:if="${rv.star < 5}">
+                            <span style="margin-left: -7px;">
+                                <span th:each="i : ${#numbers.sequence(rv.star + 1, 5)}" style="color: rgba(250, 208, 0, 0.99);">☆</span>
+                            </span>
+                        </th:block>
+                        <th:block th:if="${not #strings.isEmpty(session.UID)} and ${rv.userid} eq ${session.UID}">
+                            <span style="float:right; padding:2px;">
+                                <a th:href="|javascript:showComment(${rv.rvno},'${rv.reviewContent}',${rv.star})|" style="text-decoration: none; color: #5bc0de;">[수정]</a>
+                                 / <a th:href="|javascript:deleteComment(${rv.rvno},${rv.mvno})|" style="text-decoration: none; color: #5bc0de;">[삭제]</a>
+                            </span>
+                        </th:block>
+                    </div>
+                    <div th:text="|${#strings.substring(rv.reviewRegdate, 0, 10)} ${#strings.substring(rv.reviewRegdate, 11, 16)}|" class="text-light"></div>
+                    <p class="text-light" style="padding: 5px 0;" th:text="${rv.reviewContent}"></p>
+                </div> -->
+            </div>
+
+            <div class="row">
+                <button type="button" class="btn btn-info fw-bold offset-4 col-4" id="loadMoreBtn">
+                    더보기 <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal hide" id="modModal" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content text-light" style="background-color: #161F30;">
+                <div class="modal-header">
+                    <h3 class="modal-title">관람평 수정</h3>
+                    <span>
+                        <button type="button" class="col-auto fw-bold fs-5 btn btn-info" data-bs-dismiss="modal">X</button>
+                    </span>
+                </div>
+                <div class="modal-body row">
+                    <form name="reviseReviewFrm" id="reviseReviewFrm" method="post">
+                        <fieldset class="fieldset">
+                            <span class="text-bold">별점을 선택해주세요</span>
+                            <input type="radio" name="star" value="5" id="rate11"><label
+                                for="rate11">★</label>
+                            <input type="radio" name="star" value="4" id="rate22"><label
+                                for="rate22">★</label>
+                            <input type="radio" name="star" value="3" id="rate33"><label
+                                for="rate33">★</label>
+                            <input type="radio" name="star" value="2" id="rate44"><label
+                                for="rate44">★</label>
+                            <input type="radio" name="star" value="1" id="rate55"><label
+                                for="rate55">★</label>
+                        </fieldset>
+                        <div class="row ms-2 me-2">
+                            <textarea name="revisedReviewContent" id="revisedReviewContent" rows="6" style="resize: none;"
+                                        placeholder="평점 및 영화 관람평을 작성해주세요. (최소 10글자 이상)" maxlength="200"></textarea>
+                            <div class="bg-light text-dark text-end" id="charCount2" style="margin-top: -9px;">0 / 200</div>
+                        </div>
+                        <input type="hidden" name="userid" th:value="${session.UID}" id="sessionUID">
+                        <input type="hidden" name="mvno" th:value="${film.mvno}">
+                        <input type="hidden" name="rvno" id="rvno">
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" id="reviseReviewBtn" class="btn btn-info fw-bold col-2">수정하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // 스틸컷
+        let stillList = /*[[${stillList}]]*/ false;
+        let stillcutContainer = document.querySelector('#stillcutContainer');
+        
+        if(stillList == '') {
+            stillcutContainer.style.visibility = 'hidden';
+        }
+
+
+
+        // 더 보기
+        let reviewContainer = document.querySelector('#reviewContainer');
+        let loadMoreBtn = document.querySelector('#loadMoreBtn');
+        let sessionUID = document.querySelector('#sessionUID');
+
+        let rvList = /*[[${rvList}]]*/ false;
+
+        let star = '';
+        let showStar = (star) => {
+            if(star === 1) {
+                return '★☆☆☆☆';
+            } else if(star === 2) {
+                return '★★☆☆☆';
+            } else if(star === 3) {
+                return '★★★☆☆';
+            } else if(star === 4) {
+                return '★★★★☆';
+            } else if(star === 5) {
+                return '★★★★★';
+            }
+            return '';
+        }
+
+        // 초기 댓글 불러오기
+        for (let i = 0; i < 10; i++) {
+            let initialReviews = document.createElement("div");
+            initialReviews.className = 'row mt-5 text-light';    
+
+            if(rvList[i].userid === sessionUID.value) {
+                initialReviews.innerHTML = `
+                    <div class="col-1">
+                        <img src="../static/img/popcorn.png" style="width: 90%;">
+                    </div>
+                    <div class="col-11">
+                        <div>
+                            <span style="color: #5bc0de">${rvList[i].userid}</span>
+                            <span class="text-warning">${showStar(rvList[i].star)}</span>
+                            <span style="float:right; padding:2px;">
+                                <a href="javascript:showComment(${rvList[i].rvno},'${rvList[i].reviewContent}',${rvList[i].star})" style="text-decoration: none; color: #5bc0de;">[수정]</a>
+                                 <a href="javascript:deleteComment(${rvList[i].rvno},${rvList[i].mvno})" style="text-decoration: none; color: #5bc0de;">[삭제]</a>
+                            </span>
+                        </div>
+                        <div>${rvList[i].reviewRegdate.substring(0, 10)} ${rvList[i].reviewRegdate.substring(11, 16)}</div>
+                        <p class="text-light" style="padding: 5px 0;">${rvList[i].reviewContent}</p>
+                    </div>
+                `;
+                reviewContainer.appendChild(initialReviews);
+            } else {
+                initialReviews.innerHTML = `
+                    <div class="col-1">
+                        <img src="../static/img/popcorn.png" style="width: 90%;">
+                    </div>
+                    <div class="col-11">
+                        <span style="color: #5bc0de">${rvList[i].userid.substring(0, 2)}**${rvList[i].userid.substring(4)}</span>
+                        <span class="text-warning">${showStar(rvList[i].star)}</span>
+                        <div>${rvList[i].reviewRegdate.substring(0, 10)} ${rvList[i].reviewRegdate.substring(11, 16)}</div>
+                        <p class="text-light" style="padding: 5px 0;">${rvList[i].reviewContent}</p>
+                    </div>
+                `;
+                reviewContainer.appendChild(initialReviews);
+            }
+        }
+
+        // 더 많은 댓글 불러오기
+        let currentIndex = 10;
+
+        loadMoreBtn?.addEventListener('click', () => {
+            const reviewsPerClick = 10;
+            const endIndex = currentIndex + reviewsPerClick;
+            
+            for (let i = currentIndex; i < endIndex && i < rvList.length; i++) {
+                const moreReviews = document.createElement("div");
+                moreReviews.className = 'row mt-5 text-light';
+                if(rvList[i].userid === sessionUID.value) {
+                    moreReviews.innerHTML = `
+                        <div class="col-1">
+                            <img src="../static/img/popcorn.png" style="width: 90%;">
+                        </div>
+                        <div class="col-11">
+                            <div>
+                                <span style="color: #5bc0de">${rvList[i].userid}</span>
+                                <span class="text-warning">${showStar(rvList[i].star)}</span>
+                                <span style="float:right; padding:2px;">
+                                    <a href="javascript:showComment(${rvList[i].rvno},'${rvList[i].reviewContent}',${rvList[i].star})" style="text-decoration: none; color: #5bc0de;">[수정]</a>
+                                     <a href="javascript:deleteComment(${rvList[i].rvno},${rvList[i].mvno})" style="text-decoration: none; color: #5bc0de;">[삭제]</a>
+                                </span>
+                            </div>
+                            <div>${rvList[i].reviewRegdate.substring(0, 10)} ${rvList[i].reviewRegdate.substring(11, 16)}</div>
+                            <p class="text-light" style="padding: 5px 0;">${rvList[i].reviewContent}</p>
+                        </div>
+                    `;
+                    reviewContainer.appendChild(moreReviews);
+                } else {
+                    moreReviews.innerHTML = `
+                        <div class="col-1">
+                            <img src="../static/img/popcorn.png" style="width: 90%;">
+                        </div>
+                        <div class="col-11">
+                            <span style="color: #5bc0de">${rvList[i].userid.substring(0, 2)}**${rvList[i].userid.substring(4)}</span>
+                            <span class="text-warning">${showStar(rvList[i].star)}</span>
+                            <div>${rvList[i].reviewRegdate.substring(0, 10)} ${rvList[i].reviewRegdate.substring(11, 16)}</div>
+                            <p class="text-light" style="padding: 5px 0;">${rvList[i].reviewContent}</p>
+                        </div>
+                    `;
+                    reviewContainer.appendChild(moreReviews);
+                }
+            }
+          
+            currentIndex = endIndex;
+          
+            if (currentIndex >= rvList.length) {
+                loadMoreBtn.disabled = true;
+            }
+        })
+    </script>
+
+    <script src="/static/js/movie.js"></script>
+
+</th:block>
+
+</html>

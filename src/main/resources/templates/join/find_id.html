@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="htttp://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+    <div id="main">
+
+        <div class="mt-5">
+            <i class="fa-solid fa-magnifying-glass fa-2xl" style="color: #ffffff;"> 아이디/비밀번호 찾기 </i>
+            <hr>
+        </div>
+
+        <div class="offset-2 col-8">
+            <div class="mt-4">
+                <div class="row ps-0 ms-0">
+                    <div class="col-6 row ms-0 me-0 fs-5 fw-bold bg-info justify-content-center align-items-center"
+                         style="height: 45px;">아이디 찾기</div>
+                    <div class="col-6 row ms-0 fs-5 fw-bold border-bottom border-info align-items-center">
+                        <a href="/join/find_pass" class="text-center" style="text-decoration: none; color: white;">비밀번호 찾기</a>
+                    </div>
+                </div>
+            </div>
+            <!-- <div class="mt-4 text-light text-center fs-6">※ 회원가입 시 등록하신 이메일 주소를 입력해 주세요.</div> -->
+            <div class="mt-5 text-light fs-5">
+                <div class="row">
+                    <label for="findByName" class="col-5 row justify-content-end align-items-center">이름</label>
+                    <div class="col-4">
+                        <input type="text" name="findByName" id="findByName" class="form-control" maxlength="10">
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <label for="findByPhone" class="col-5 row justify-content-end align-items-center">핸드폰 번호</label>
+                    <div class="col-4">
+                        <input type="text" name="findByPhone" id="findByPhone" class="form-control" maxlength="11" placeholder="'-'없이 입력">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-5">
+                <button type="submit" class="btn btn-info offset-5 col-3 fw-bold" id="findIdBtn" 
+                        data-bs-toggle="modal" data-bs-target="#findIdModal" disabled>아이디 찾기</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="findIdModal" tabindex="-1" aria-labelledby="findIdModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-light" style="background-color: #161f30;">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">알림</h1>
+                    <button type="button" class="btn btn-info fw-bold" data-bs-dismiss="modal" aria-label="Close" id="clsIdBtn">X</button>
+                </div>
+                <div class="modal-body mt-2 mb-2" id="fdidmsg"></div>
+                <div class="modal-footer row ms-0 me-0 justify-content-center">
+                    <button type="button" class="btn btn-info fw-bold col-4" data-bs-dismiss="modal" aria-label="Close" id="chkIdBtn">확인</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/join.js"></script>
+</th:block>
+
+</html>

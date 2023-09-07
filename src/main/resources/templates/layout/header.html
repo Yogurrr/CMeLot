@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="header">
+    <header class="row">
+        <div class="offset-5 col-2 text-center">
+            <h1 id="logo" class="fw-bold text-light">CMeLot</h1>
+        </div>
+        <div class="offset-2 row col-3 text-end justify-content-end align-items-end" th:with="path=${#request.getRequestURI()}">
+            <th:block th:if="${not #strings.startsWith(path, '/join')}">
+                <th:block th:if="${#strings.isEmpty(session.UID)}">
+                    <div class="row justify-content-end">
+                        <div class="col-auto text-light text-center" data-bs-target="#loginfrm" data-bs-toggle="modal">
+                           <i class="fa-solid fa-lock fa-2xl" style="color: #ffffff;"></i> 
+                           <div class="text-center mt-2 pb-2">로그인</div>
+                        </div>
+                        <div class="col-auto text-light text-center ms-2" id="signupbtn">
+                            <i class="fa-solid fa-user-plus fa-2xl" style="color: #ffffff;"></i> 
+                           <div class="text-center mt-2 pb-2">회원가입</div>
+                        </div>
+                    </div>
+                </th:block>
+
+                <th:block th:if="${not #strings.isEmpty(session.UID)}">
+                    <div class="row justify-content-end">
+                        <div class="col-auto text-light text-center" id="lgoutbtn">
+                            <i class="fa-solid fa-unlock fa-2xl" style="color: #ffffff;"></i> 
+                            <div class="text-center mt-2 pb-2">로그아웃</div>
+                         </div>
+                        <th:block th:if="${session.UID} eq 'admin'">
+                            <div class="col-auto text-light text-center ms-2">
+                                <a th:href="|/adminindex|" style="text-decoration: none; color: white;">
+                                    <i class="fa-solid fa-hammer fa-2xl" style="color: #ffffff;"></i> 
+                                    <div class="text-center mt-2 pb-2">관리자</div>
+                                </a>
+                            </div>
+                        </th:block>
+                        <th:block th:if="${session.UID} ne 'admin'">
+                            <div class="col-auto text-light text-center ms-2">
+                                <a th:href="|/mypage/mycml?userid=${session.UID}|" style="text-decoration: none; color: white;">
+                                    <i class="fa-solid fa-user fa-2xl" style="color: #ffffff;"></i> 
+                                    <div class="text-center mt-2 pb-2">회원정보</div>
+                                </a>
+                            </div>
+                        </th:block>
+                    </div>
+                </th:block>
+            </th:block>
+        </div>
+    </header>
+    <nav class="navbar navbar-expand navbar-light bg-info">
+        <ul class="navbar-nav w-100">
+            <li class="nav-item col-6"><a href="/movie/all" class="nav-link fw-bold fs-4 text-end" style="padding-right: 5%;">영화</a></li>
+            <li class="nav-item col-6"><a href="/ticket/booking" class="nav-link fw-bold fs-4" style="padding-left: 5%;">예매</a></li>
+        </ul>
+    </nav>
+</th:block>
+</html>

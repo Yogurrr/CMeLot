@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+
+    <th:block th:if="${#strings.isEmpty(session.UID)}">
+        <script>location.href = "/";</script>
+    </th:block>
+
+    <div id="main" class="row mt-2">
+
+        <div class="col">
+            <div class="row mt-5">
+                <div class="col-2">
+                    <ul class="list-group">
+                        <li class="list-group-item active fw-bold" aria-current="true">나의 CMeLot</li>
+                        <li class="list-group-item"><a th:href="|myticket?userid=${session.UID}|" style="text-decoration: none">예매 내역</a></li>
+                        <li class="list-group-item"><a th:href="|modify?userid=${session.UID}|" style="text-decoration: none">회원 정보 수정</a></li>
+                    </ul>
+                </div>   <!-- 메뉴 -->
+                <div class="offset-1 col-9">
+                    <table class="row col ms-0 me-0 border border-info" style="min-height: 342px;">
+                        <tbody class="ps-0 pe-0">
+                            <tr class="row ms-0 me-0 bg-info border border-info">
+                                <td class="pt-3 pb-3" colspan="2">
+                                    <div class="row ps-4">
+                                        <div class="col-1 p-0 m-0 imgWrapper">
+                                            <th:block th:if="${mp.profilepic} ne null">
+                                                <img th:src="|${mp.profilepic}.${mp.pictype}|" width="90%" class="rounded-circle">
+                                            </th:block>
+                                            <th:block th:if="${mp.profilepic} eq null">
+                                                <img src="http://localhost/cdn/profilepic/profile.png" width="90%" class="rounded-circle">
+                                            </th:block>
+                                        </div>
+                                        <div class="col-11 fw-bold fs-4">
+                                            <div>안녕하세요!</div>
+                                            <div class="row">
+                                                <div class="col-auto pe-0" th:text="|${mp.name}님|"></div>
+                                                <a class="col-auto ps-1 pe-0" style="margin-top: -13px;" th:href="|modify?userid=${session.UID}|">
+                                                    <i class="fa-solid fa-pen-nib fa-2xs" style="color: black"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>   <!-- 인삿말 -->
+                            <tr class="row ms-0 me-0" style="border-top: 1px solid #bce8f1;">
+                                <td colspan="2" class="row me-0 pe-0 mt-3">
+                                    <div class="col fw-bold fs-4 text-light">예매내역</div>
+                                    <div class="col row me-0 pe-0 text-end align-items-end justify-content-end">
+                                        <a th:href="|myticket?userid=${session.UID}|" class="text-light pe-0" style="text-decoration: none;">
+                                            더보기 <i class="fa-solid fa-chevron-right"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>   <!-- 예매내역 & 더보기 -->
+                            <tr class="row">
+                                <td class="col" th:each="bd : ${t2list}">
+                                    <div class="row ms-3 mt-2 mb-3 me-3 border rounded" style="border-color: #bce8f1 !important;">
+                                        <div class="col-3 pt-2 pb-2">
+                                            <!-- <img th:src="${bd.poster}" style="max-width: 100px; max-height: 135px;"> -->
+                                            <img th:src="${@movieRepository.findMoviePoster(bd.title)}" style="max-width: 100px; max-height: 135px;">
+                                        </div>
+                                        <div class="col-9 pt-2 pb-2 text-light">
+                                            <div th:text="${bd.title}" class="fw-bold"></div>
+                                            <div th:text="${bd.bookingNum}"></div>
+                                            <div th:text="|결제일시 : ${#strings.substring(bd.paymentDate, 0, 10)} (${#strings.substring(bd.paymentDate, 11, 16)})|"></div>
+                                            <div th:text="|${bd.cinemaType} ${bd.region} (${bd.theater})|"></div>
+                                            <div th:text="|관람일 : ${#strings.substring(bd.viewingDay, 0, 10)} ${#strings.substring(bd.viewingDay, 11, 16)}|"></div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>   <!-- 예매내역 테이블 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</th:block>
+
+</html>
