@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="htttp://www.ultra.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/template}">
+
+<th:block layout:fragment="content">
+    <div id="main">
+
+        <div class="text-light text-center">
+            <h2>[테스트]</h2>
+            <h3>영화 목록</h3>
+            <button class="btn btn-success fw-bold" id="movieNameOne">여귀교</button>
+            <div class="mt-2" id="posterDiv"></div>
+        </div>
+
+    </div>
+
+    <script th:inline="javascript">
+        const filmList = /*[[${filmList}]]*/ false;
+        const movieNameOne = document.querySelector('#movieNameOne');
+        const posterDiv = document.querySelector('#posterDiv');
+
+        movieNameOne?.addEventListener("click", () => {
+            for(let i = 0; i < filmList.length; i++) {
+                if(filmList[i].title === movieNameOne.innerHTML) {
+                    posterDiv.innerHTML = `
+                        <img src="${filmList[i].poster}"></img>
+                        <div>${movieNameOne.innerHTML}</div>
+                    `;
+                }
+            }
+
+            if(movieNameOne.innerHTML) {
+                //
+            }
+        })
+    </script>
+
+</th:block>
+
+</html>

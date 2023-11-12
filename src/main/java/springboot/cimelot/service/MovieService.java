@@ -33,4 +33,6 @@ public interface MovieService {
     List<MovieStillcut> readOneStillcut(int mvno);
 
     boolean newBooking(BookingDetails bk);
+
+    Map<String, Object> readOnePoster();
 }

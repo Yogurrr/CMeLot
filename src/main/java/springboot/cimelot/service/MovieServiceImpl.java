@@ -82,4 +82,10 @@ public class MovieServiceImpl implements MovieService {
         if (mvdao.insertBooking(bk) > 0) result = true;
         return result;
     }
+
+    @Override
+    public Map<String, Object> readOnePoster() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'readOnePoster'");
+    }
 }

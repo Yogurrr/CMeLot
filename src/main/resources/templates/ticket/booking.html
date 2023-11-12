@@ -1118,7 +1118,6 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #161F30;">
-                    <!-- <button type="button" class="btn btn-danger fw-bold col-2" id="saveTest">test</button> -->
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="ticketCancel">선택 취소</button>
                     <button type="button" class="btn btn-info fw-bold" id="ticketApproval">선택 완료</button>
                     <input type="hidden" id="moviegoersValue">
@@ -1132,6 +1131,7 @@
     <script th:inline="javascript">
         // 카카오페이 결제
         let bkfrm = document.forms.bkfrm;
+
         var IMP = window.IMP;
         IMP.init("imp43105688");
 
@@ -1195,6 +1195,7 @@
         const scheduleContainer = document.querySelector('#scheduleContainer');
 
         const schList = /*[[${schList}]]*/ false;
+        const filmList = /*[[${filmList}]]*/ false;
 
         const go2SelectSeat = document.querySelector('#go2SelectSeat');
         const priceContainer = document.querySelector('#priceContainer');
@@ -1339,7 +1340,13 @@
                         
                             selectedTheater.innerText = theaterValue;
                             selectedTime.innerText = ' ' + buttonTextTime;
-                            selectedMoviePoster.innerHTML = `<img src="/static/img/${title}.jpg" class="img-fluid" style="height: 100%;">`;
+
+                            for(let i = 0; i < filmList.length; i++) {
+                                if(filmList[i].title === title) {
+                                    selectedMoviePoster.innerHTML = `<img src="${filmList[i].poster}" class="img-fluid" style="height: 100%;">`;
+                                }
+                            }
+
                             selectedMovieRating.innerHTML = `<img src="/static/img/${rating}.png" class="img-fluid">`;
                             selectedMovieTitle.innerText = `${title}`;
                         

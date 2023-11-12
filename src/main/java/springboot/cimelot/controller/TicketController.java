@@ -7,6 +7,8 @@ import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 
 import springboot.cimelot.model.BookingDetails;
+import springboot.cimelot.model.Movie;
+import springboot.cimelot.repository.MovieRepository;
 import springboot.cimelot.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -31,8 +34,10 @@ public class TicketController {
         ModelAndView mv = new ModelAndView();
 
         Map<String, Object> schedules = mvsrv.readScreeningSchedule();
-
+        Map<String, Object> posters = mvsrv.readAllMovie();
+        
         mv.addObject("schList", schedules.get("schList"));
+        mv.addObject("filmList", posters.get("filmList"));
         mv.setViewName("ticket/booking");
 
         return mv;
@@ -63,13 +68,19 @@ public class TicketController {
         return api.paymentByImpUid(imp_uid);
     }
 
-    // @ResponseBody
-    // @RequestMapping(value="/loadMovielist")
-    // public String loadMovielist(@RequestBody String test01) {
-    //     Gson gson = new Gson();
-    //     Ticketing ticketing = gson.fromJson(test01, Ticketing.class);
-    //     String test = mvsrv.readMovielist(ticketing);
-        
-    //     return test;
-    // }
+
+
+
+
+    @GetMapping("/test")
+    public ModelAndView test(){
+        ModelAndView mv = new ModelAndView();
+
+        Map<String, Object> posters = mvsrv.readAllMovie();
+
+        mv.addObject("filmList", posters.get("filmList"));
+        mv.setViewName("ticket/test");
+
+        return mv;
+    }
 }
